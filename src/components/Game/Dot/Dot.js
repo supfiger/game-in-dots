@@ -1,22 +1,12 @@
 import React from "react";
-import cx from "classnames";
+import classNames from "classnames";
 
 import "./Dot.sass";
 
 const Dot = (props) => {
-  const { onClick, blueDot, greenDot, redDot } = props;
+  const { onClick, status } = props;
 
-  return (
-    <li
-      className={cx({
-        Dot: true,
-        blueDot: blueDot,
-        greenDot: greenDot,
-        redDot: redDot,
-      })}
-      onClick={onClick}
-    />
-  );
+  return <li className={classNames("Dot", status)} onClick={onClick} />;
 };
 
 export default Dot;

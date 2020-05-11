@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from "react";
-import cx from "classnames";
+import classNames from "classnames";
 import _ from "lodash";
 
 import "./Game.sass";
@@ -25,6 +25,7 @@ export default class Game extends Component {
       loading: false,
       fieldDots: [],
       lastNumber: null,
+      prevLastNumber: null,
       points: {
         computer: [],
         user: [],
@@ -211,14 +212,10 @@ export default class Game extends Component {
     const max = field ** 2;
 
     if (field) {
-      for (let dot = min; dot < max; dot++) {
-        fieldDots[dot] = {
-          blueDot: false,
-          greenDot: false,
-          redDot: false,
-          hoverDot: false,
-          free: true,
-          id: dot,
+      for (let i = 0; i < max; i++) {
+        fieldDots[i] = {
+          status: "initial",
+          id: i,
         };
       }
 
@@ -230,36 +227,35 @@ export default class Game extends Component {
 
   updateField = () => {
     const { field, delay } = this.state;
-    let { fieldDots, lastNumber, points } = this.state;
     const min = 0;
     const max = field ** 2;
-    let uniqueRandomNumbers = _.sampleSize(_.range(min, max), max);
+    console.log("max", max);
+    const uniqueRandomNumbers = _.sampleSize(_.range(min, max), max);
 
     const newField = () => {
-      lastNumber = uniqueRandomNumbers.pop();
-      let currentDot = fieldDots[lastNumber];
+      const { fieldDots, lastNumber, points } = this.state;
+      const updatedFieldDots = [...fieldDots];
+      let updatedPoints = { ...points };
+      const prevNumber = lastNumber;
+      const prevDot = updatedFieldDots[lastNumber];
 
-      points.computer.push(lastNumber);
-      console.log("points", points);
-
-      if (currentDot.free === true) {
-        currentDot.blueDot = true;
-        currentDot.greenDot = false;
-        currentDot.redDot = false;
-        currentDot.free = false;
+      // Make red dot for prev number
+      if (prevNumber !== null && prevDot.status !== "greenDot") {
+        updatedFieldDots[prevDot.id] = { ...prevDot, status: "redDot" };
+        updatedPoints = {
+          ...updatedPoints,
+          computer: [...updatedPoints.computer, prevDot.id],
+        };
       }
 
-      if (currentDot.free === false) {
-        currentDot.blueDot = false;
-        currentDot.greenDot = false;
-        currentDot.redDot = true;
-        currentDot.free = false;
-      }
+      const newLastNumber = uniqueRandomNumbers.pop();
+      const updatedCurrentDot = updatedFieldDots[newLastNumber];
+      updatedCurrentDot.status = "blueDot";
 
       this.setState({
-        fieldDots,
-        lastNumber,
-        points,
+        fieldDots: updatedFieldDots,
+        lastNumber: newLastNumber,
+        points: updatedPoints,
       });
     };
 
@@ -275,29 +271,29 @@ export default class Game extends Component {
   };
 
   onClickDot = (id) => {
-    let { fieldDots } = this.state;
+    let { fieldDots, points } = this.state;
     const { lastNumber } = this.state;
     let currentDot = fieldDots[lastNumber];
 
     if (id === lastNumber) {
-      currentDot.blueDot = false;
-      currentDot.greenDot = true;
-      currentDot.redDot = false;
-      currentDot.free = false;
+      currentDot.status = "greenDot";
+      points.user.push(lastNumber);
+      console.log("points.user", points.user);
 
       this.setState({
         fieldDots,
+        points,
       });
     }
   };
 
   Field = () => {
-    const { field, delay, fieldDots } = this.state;
+    const { field, fieldDots } = this.state;
 
     return (
       <div className="Field">
         <ul
-          className={cx({
+          className={classNames({
             grid: true,
             easy: field == 5,
             normal: field == 10,
