@@ -1,13 +1,13 @@
 import React from "react";
-import { Board } from "./components/index";
+
+import "./App.sass";
+import { Board, Game } from "./components/index";
 
 function App() {
   return (
-    <div>
-      <div>App component</div>
-      <div>
-        <Board />
-      </div>
+    <div className="App">
+      <Game />
+      <Board />
     </div>
   );
 }

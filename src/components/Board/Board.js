@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 
 import "./Board.sass";
 import { winnersGet } from "../../api.js";
@@ -17,9 +17,8 @@ export default class Board extends Component {
     try {
       const result = await winnersGet();
       this.setState({
-        winnersItems: result,
+        winnersItems: result.reverse(),
       });
-      console.log("Board result", result);
     } catch (error) {
       this.setState({
         error: error,
@@ -31,27 +30,30 @@ export default class Board extends Component {
     this.fetchWinnersGet();
   }
 
+  componentDidUpdate() {
+    this.fetchWinnersGet();
+  }
+
   render() {
-    const {
-      state: { winnersItems },
-    } = this;
+    const { winnersItems } = this.state;
 
     return (
-      <div>
-        <h1>Leader Board</h1>
-        {winnersItems && winnersItems.length > 0 && (
-          <div>
-            <ul className="leadersList">
-              {winnersItems.map((item) => (
-                <li key={item.id} className="leaderListItem">
-                  <div>{item.winner}</div>
-                  <div>{item.date}</div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-        <div></div>
+      <div className="Board">
+        <Fragment>
+          <h2 className="boardTitle">Leader Board</h2>
+          {winnersItems && winnersItems.length > 0 && (
+            <div>
+              <ul className="leaderList">
+                {winnersItems.map((item) => (
+                  <li key={item.id} className="leaderListItem">
+                    <div className="leaderUsername">{item.winner}</div>
+                    <div className="leaderDate">{item.date}</div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </Fragment>
       </div>
     );
   }

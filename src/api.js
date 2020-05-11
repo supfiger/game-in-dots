@@ -24,10 +24,14 @@ export const winnersGet = async () => {
   }
 };
 
-export const winnersPost = async () => {
+export const winnersPost = async (body) => {
   try {
     let response = await fetch(requestURL + "/winners", {
       method: "POST",
+      body: JSON.stringify(body),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
     let result = await response.json();
     return result;
