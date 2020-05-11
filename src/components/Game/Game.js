@@ -12,12 +12,12 @@ export default class Game extends Component {
     super(props);
 
     this.state = {
-      name: "",
+      user: "",
       winner: "",
       gameMode: "DEFAULT",
       gameSettings: {},
-      isGameStart: false,
-      isGameFinish: false,
+      isGameStarted: false,
+      isGameFinished: false,
       toPostWinner: {},
       error: null,
       field: null,
@@ -93,12 +93,12 @@ export default class Game extends Component {
   };
 
   onClickFinish = () => {
-    const winner = this.state.name;
+    const winner = this.state.user;
 
     this.setState(
       {
-        isGameFinish: true,
-        isGameStart: false,
+        isGameFinished: true,
+        isGameStarted: false,
         winner,
       },
       () => this.whoWon()
@@ -120,16 +120,129 @@ export default class Game extends Component {
   };
 
   onChangeName = (e) => {
-    const name = e.target.value;
+    const user = e.target.value;
 
-    this.setState({ name });
+    this.setState({ user });
   };
 
-  onClickPlay = () => {
-    const isGameStart = true;
-    const isGameFinish = false;
+  onClickPlay = (user) => {
+    const isGameStarted = true;
+    const isGameFinished = false;
 
-    this.setState({ isGameStart, isGameFinish }, () => this.gameIsStarted());
+    this.setState({ isGameStarted, isGameFinished, user }, () =>
+      this.gameIsStarted()
+    );
+  };
+
+  createFieldDots = () => {
+    const { field } = this.state;
+    let fieldDots = [];
+    const max = field ** 2;
+
+    // Adding dots to the array with own properties
+    for (let i = 0; i < max; i++) {
+      fieldDots[i] = {
+        status: "initial",
+        id: i,
+      };
+    }
+
+    this.setState({
+      fieldDots,
+      max,
+    });
+  };
+
+  gameIsStarted = () => {
+    const { field, delay, max } = this.state;
+
+    // Creating an array of random unique numbers (from 0 to max)
+    const uniqueRandomNumbers = sampleSize(range(0, max), max);
+
+    // Creating and displaying a new random blue dot and change it to red,
+    // when it has not been pressed for the time period "delay"
+    const generateRandomDot = () => {
+      const { fieldDots, lastNumber, points } = this.state;
+      const updatedFieldDots = [...fieldDots];
+      let updatedPoints = { ...points };
+      const prevNumber = lastNumber;
+      const prevDot = updatedFieldDots[lastNumber];
+
+      // Making a red dot for a prev number
+      if (prevNumber !== null && prevDot.status !== "green") {
+        updatedFieldDots[prevDot.id] = {
+          ...prevDot,
+          status: "red",
+        };
+        updatedPoints = {
+          ...updatedPoints,
+          computer: [...updatedPoints.computer, prevDot.id],
+        };
+      }
+      console.log("points.computer", this.state.points.computer);
+
+      const newLastNumber = uniqueRandomNumbers.pop();
+      const updatedCurrentDot = updatedFieldDots[newLastNumber];
+      updatedCurrentDot.status = "blue";
+
+      this.setState({
+        fieldDots: updatedFieldDots,
+        lastNumber: newLastNumber,
+        points: updatedPoints,
+      });
+      this.gameIsFinished();
+    };
+
+    // Setting interval for generate a new random dot
+    let currentDotIndex = 0;
+    const timer = setInterval(() => {
+      generateRandomDot();
+      currentDotIndex++;
+      if (currentDotIndex === max || this.state.isGameFinished) {
+        clearInterval(timer);
+        console.log("timer ended");
+      }
+    }, delay);
+  };
+
+  gameIsFinished = () => {
+    const { points, max, user } = this.state;
+    const isGameFinished = true;
+    const isGameStarted = false;
+
+    if (points.computer.length == Math.floor(max / 2)) {
+      this.setState({
+        isGameFinished,
+        isGameStarted,
+        winner: "Computer",
+      });
+    }
+
+    if (points.user.length == Math.floor(max / 2)) {
+      this.setState({
+        isGameFinished,
+        isGameStarted,
+        winner: user,
+      });
+    }
+  };
+
+  onClickDot = (id) => {
+    let { fieldDots, points } = this.state;
+    const { lastNumber } = this.state;
+    let currentDot = fieldDots[lastNumber];
+
+    // Changing dot color to blue and set a point to user when he clicked to blue dot
+    if (id === lastNumber) {
+      currentDot.status = "green";
+      points.user.push(lastNumber);
+      console.log("points.user", points.user);
+
+      this.setState({
+        fieldDots,
+        points,
+      });
+    }
   };
 
   Panel = () => {
@@ -137,15 +250,15 @@ export default class Game extends Component {
       state: {
         gameMode,
         gameSettings,
-        name,
-        isGameStart,
-        isGameFinish,
+        user,
+        isGameStarted,
+        isGameFinished,
         loading,
       },
     } = this;
 
     const disablePlayButton =
-      gameMode === "DEFAULT" || name === "" || isGameStart;
+      gameMode === "DEFAULT" || user === "" || isGameStarted;
 
     return (
       <div className="Panel">
@@ -168,130 +281,35 @@ export default class Game extends Component {
         <div className="inputName">
           <input
             className="enterName"
-            value={name}
+            value={user}
             onChange={this.onChangeName}
             type="text"
-            placeholder="Enter your name"
+            placeholder="Enter your user"
           />
         </div>
         <button
           className="playButton"
-          onClick={this.onClickPlay}
+          onClick={() => this.onClickPlay(user)}
           disabled={disablePlayButton}
         >
-          {isGameFinish ? `PLAY AGAIN` : `PLAY`}
+          {isGameFinished ? `PLAY AGAIN` : `PLAY`}
         </button>
       </div>
     );
   };
 
   Message = () => {
-    const { isGameStart, isGameFinish } = this.state;
+    const { isGameFinished, winner } = this.state;
 
     return (
       <div className="Message">
-        {this.state.isGameFinish && (
+        {this.state.isGameFinished && (
           <Fragment>
             WON: <span>{this.state.winner}</span>
           </Fragment>
         )}
-        {(isGameStart || isGameFinish) && (
-          <Fragment>
-            {isGameStart && <div>Game is start!</div>}
-            {isGameFinish && <div>Game is finish!</div>}
-            <button onClick={this.onClickFinish}>Finish the game</button>
-          </Fragment>
-        )}
       </div>
     );
-  };
-
-  createFieldDots = () => {
-    const { field } = this.state;
-    let fieldDots = [];
-    const max = field ** 2;
-
-    // adding dots to the array with own properties
-    for (let i = 0; i < max; i++) {
-      fieldDots[i] = {
-        status: "initial",
-        id: i,
-      };
-    }
-
-    this.setState({
-      fieldDots,
-      max,
-    });
-  };
-
-  gameIsStarted = () => {
-    const { field, delay, max } = this.state;
-
-    // create an array of random unique numbers from 0 to max
-    const uniqueRandomNumbers = sampleSize(range(0, max), max);
-
-    // creating and displaying a new random blue dot and change it to red,
-    // when it has not been pressed for the time period "delay"
-    const generateRandomDot = () => {
-      const { fieldDots, lastNumber, points } = this.state;
-      const updatedFieldDots = [...fieldDots];
-      let updatedPoints = { ...points };
-      const prevNumber = lastNumber;
-      const prevDot = updatedFieldDots[lastNumber];
-
-      // making a red dot for a prev number
-      if (prevNumber !== null && prevDot.status !== "green") {
-        updatedFieldDots[prevDot.id] = {
-          ...prevDot,
-          status: "red",
-        };
-        updatedPoints = {
-          ...updatedPoints,
-          computer: [...updatedPoints.computer, prevDot.id],
-        };
-      }
-
-      const newLastNumber = uniqueRandomNumbers.pop();
-      const updatedCurrentDot = updatedFieldDots[newLastNumber];
-      updatedCurrentDot.status = "blue";
-
-      this.setState({
-        fieldDots: updatedFieldDots,
-        lastNumber: newLastNumber,
-        points: updatedPoints,
-      });
-      console.log("points.computer", points.computer);
-    };
-
-    // setting interval for generate new random dot
-    let currentDotIndex = 0;
-    const timer = setInterval(() => {
-      generateRandomDot();
-      currentDotIndex++;
-      if (currentDotIndex === max) {
-        clearInterval(timer);
-        console.log("timer ended");
-      }
-    }, delay);
-  };
-
-  onClickDot = (id) => {
-    let { fieldDots, points } = this.state;
-    const { lastNumber } = this.state;
-    let currentDot = fieldDots[lastNumber];
-
-    // changing dot color to blue and set a point to user when he clicked to blue dot
-    if (id === lastNumber) {
-      currentDot.status = "green";
-      points.user.push(lastNumber);
-      console.log("points.user", points.user);
-
-      this.setState({
-        fieldDots,
-        points,
-      });
-    }
   };
 
   Field = () => {
@@ -324,7 +342,7 @@ export default class Game extends Component {
 
     return (
       <div className="Game">
-        <h1 className="gameTitle">Game In Dots</h1>
+        <h1 className="gameTitle">Game in Dots</h1>
         <div className="content">
           {this.Panel()}
           {this.Message()}
