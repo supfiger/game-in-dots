@@ -104,7 +104,7 @@ export default class Game extends Component {
     );
   };
 
-  onChangeMode = (e) => {
+  onChangeGameMode = (e) => {
     const { gameSettings } = this.state;
     const gameMode = e.target.value;
 
@@ -114,7 +114,7 @@ export default class Game extends Component {
         field: gameSettings[gameMode].field,
         delay: gameSettings[gameMode].delay,
       },
-      () => this.createField()
+      () => this.createFieldDots()
     );
   };
 
@@ -128,7 +128,7 @@ export default class Game extends Component {
     const isGameStart = true;
     const isGameFinish = false;
 
-    this.setState({ isGameStart, isGameFinish }, () => this.updateField());
+    this.setState({ isGameStart, isGameFinish }, () => this.gameIsStarted());
   };
 
   Panel = () => {
@@ -144,7 +144,7 @@ export default class Game extends Component {
     } = this;
 
     const disablePlayButton =
-      gameMode == "DEFAULT" || name == "" || isGameStart;
+      gameMode === "DEFAULT" || name === "" || isGameStart;
 
     return (
       <div className="Panel">
@@ -152,7 +152,7 @@ export default class Game extends Component {
           {loading ? (
             <div>Loading...</div>
           ) : (
-            <select value={gameMode} onChange={this.onChangeMode}>
+            <select value={gameMode} onChange={this.onChangeGameMode}>
               <option value="DEFAULT" disabled>
                 Pick game mode...
               </option>
@@ -205,10 +205,9 @@ export default class Game extends Component {
     );
   };
 
-  createField = () => {
+  createFieldDots = () => {
     const { field } = this.state;
     let fieldDots = [];
-    const min = 0;
     const max = field ** 2;
 
     if (field) {
@@ -225,14 +224,13 @@ export default class Game extends Component {
     }
   };
 
-  updateField = () => {
+  gameIsStarted = () => {
     const { field, delay } = this.state;
     const min = 0;
     const max = field ** 2;
-    console.log("max", max);
     const uniqueRandomNumbers = _.sampleSize(_.range(min, max), max);
 
-    const newField = () => {
+    const generateColorDot = () => {
       const { fieldDots, lastNumber, points } = this.state;
       const updatedFieldDots = [...fieldDots];
       let updatedPoints = { ...points };
@@ -240,17 +238,21 @@ export default class Game extends Component {
       const prevDot = updatedFieldDots[lastNumber];
 
       // Make red dot for prev number
-      if (prevNumber !== null && prevDot.status !== "greenDot") {
-        updatedFieldDots[prevDot.id] = { ...prevDot, status: "redDot" };
+      if (prevNumber !== null && prevDot.status !== "green") {
+        updatedFieldDots[prevDot.id] = {
+          ...prevDot,
+          status: "red",
+        };
         updatedPoints = {
           ...updatedPoints,
           computer: [...updatedPoints.computer, prevDot.id],
         };
       }
+      console.log("points.computer", points.computer);
 
       const newLastNumber = uniqueRandomNumbers.pop();
       const updatedCurrentDot = updatedFieldDots[newLastNumber];
-      updatedCurrentDot.status = "blueDot";
+      updatedCurrentDot.status = "blue";
 
       this.setState({
         fieldDots: updatedFieldDots,
@@ -259,11 +261,11 @@ export default class Game extends Component {
       });
     };
 
-    let i = min;
+    let currentDotIndex = min;
     const timer = setInterval(() => {
-      newField();
-      i++;
-      if (i === max) {
+      generateColorDot();
+      currentDotIndex++;
+      if (currentDotIndex === max) {
         clearInterval(timer);
         console.log("timer ended");
       }
@@ -276,7 +278,7 @@ export default class Game extends Component {
     let currentDot = fieldDots[lastNumber];
 
     if (id === lastNumber) {
-      currentDot.status = "greenDot";
+      currentDot.status = "green";
       points.user.push(lastNumber);
       console.log("points.user", points.user);
 
@@ -295,16 +297,16 @@ export default class Game extends Component {
         <ul
           className={classNames({
             grid: true,
-            easy: field == 5,
-            normal: field == 10,
-            hard: field == 15,
+            easy: field === 5,
+            normal: field === 10,
+            hard: field === 15,
           })}
         >
           {fieldDots.map((dot) => (
             <Dot
               key={dot.id}
-              {...dot}
               onClick={() => this.onClickDot(dot.id)}
+              {...dot}
             />
           ))}
         </ul>
