@@ -68,43 +68,6 @@ export default class Game extends Component {
     this.fetchGameSettings();
   }
 
-  whoWon = () => {
-    const { toPostWinner, winner } = this.state;
-    let uploadWinner = toPostWinner;
-
-    const date = new Date();
-    const winnerTime = `${date.toLocaleString("default", {
-      hour: "numeric",
-      minute: "numeric",
-    })}; ${date.getDate()} ${date.toLocaleString("en", {
-      month: "long",
-    })} ${date.getFullYear()}`;
-
-    uploadWinner.winner = winner;
-    uploadWinner.date = winnerTime;
-
-    console.log("toPostWinner", toPostWinner);
-
-    this.setState({
-      toPostWinner: uploadWinner,
-    });
-
-    this.fetchWinnersPost();
-  };
-
-  onClickFinish = () => {
-    const winner = this.state.user;
-
-    this.setState(
-      {
-        isGameFinished: true,
-        isGameStarted: false,
-        winner,
-      },
-      () => this.whoWon()
-    );
-  };
-
   onChangeGameMode = (e) => {
     const { gameSettings } = this.state;
     const gameMode = e.target.value;
@@ -225,6 +188,31 @@ export default class Game extends Component {
         winner: user,
       });
     }
+    if (this.state.isGameFinished) {
+      this.postWinnerToBoard();
+    }
+  };
+
+  postWinnerToBoard = () => {
+    const { toPostWinner, winner } = this.state;
+    let uploadWinner = toPostWinner;
+
+    const date = new Date();
+    const winnerTime = `${date.toLocaleString("default", {
+      hour: "numeric",
+      minute: "numeric",
+    })}; ${date.getDate()} ${date.toLocaleString("en", {
+      month: "long",
+    })} ${date.getFullYear()}`;
+
+    uploadWinner.winner = winner;
+    uploadWinner.date = winnerTime;
+
+    this.setState({
+      toPostWinner: uploadWinner,
+    });
+
+    this.fetchWinnersPost();
   };
 
   onClickDot = (id) => {
