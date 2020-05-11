@@ -88,13 +88,20 @@ export default class Game extends Component {
     this.setState({ user });
   };
 
-  onClickPlay = (user) => {
-    const isGameStarted = true;
-    const isGameFinished = false;
+  onClickPlay = () => {
+    console.log("isGameFinished", this.state.isGameFinished);
+    if (this.state.isGameFinished) {
+      this.createFieldDots();
+    }
 
-    this.setState({ isGameStarted, isGameFinished, user }, () =>
-      this.gameIsStarted()
-    );
+    if (!this.state.isGameStarted) {
+      const isGameStarted = true;
+      const isGameFinished = false;
+
+      this.setState({ isGameStarted, isGameFinished }, () =>
+        this.gameIsStarted()
+      );
+    }
   };
 
   createFieldDots = () => {
@@ -170,26 +177,51 @@ export default class Game extends Component {
 
   gameIsFinished = () => {
     const { points, max, user } = this.state;
-    const isGameFinished = true;
-    const isGameStarted = false;
+    const resetState = {
+      isGameFinished: true,
+      isGameStarted: false,
+      lastNumber: null,
+      prevLastNumber: null,
+      points: {
+        computer: [],
+        user: [],
+      },
+    };
 
     if (points.computer.length == Math.floor(max / 2)) {
       this.setState({
-        isGameFinished,
-        isGameStarted,
         winner: "Computer",
+        ...resetState,
       });
     }
 
     if (points.user.length == Math.floor(max / 2)) {
       this.setState({
-        isGameFinished,
-        isGameStarted,
         winner: user,
+        ...resetState,
       });
     }
+
     if (this.state.isGameFinished) {
       this.postWinnerToBoard();
+    }
+  };
+
+  onClickDot = (id) => {
+    let { fieldDots, points } = this.state;
+    const { lastNumber } = this.state;
+    let currentDot = fieldDots[lastNumber];
+
+    // Changing dot color to blue and set a point to user when he clicked to blue dot
+    if (id === lastNumber) {
+      currentDot.status = "green";
+      points.user.push(lastNumber);
+      console.log("points.user", points.user);
+
+      this.setState({
+        fieldDots,
+        points,
+      });
     }
   };
 
@@ -213,24 +245,6 @@ export default class Game extends Component {
     });
 
     this.fetchWinnersPost();
-  };
-
-  onClickDot = (id) => {
-    let { fieldDots, points } = this.state;
-    const { lastNumber } = this.state;
-    let currentDot = fieldDots[lastNumber];
-
-    // Changing dot color to blue and set a point to user when he clicked to blue dot
-    if (id === lastNumber) {
-      currentDot.status = "green";
-      points.user.push(lastNumber);
-      console.log("points.user", points.user);
-
-      this.setState({
-        fieldDots,
-        points,
-      });
-    }
   };
 
   Panel = () => {
@@ -277,7 +291,7 @@ export default class Game extends Component {
         </div>
         <button
           className="playButton"
-          onClick={() => this.onClickPlay(user)}
+          onClick={this.onClickPlay}
           disabled={disablePlayButton}
         >
           {isGameFinished ? `PLAY AGAIN` : `PLAY`}
