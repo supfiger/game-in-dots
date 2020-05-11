@@ -266,27 +266,10 @@ export default class Game extends Component {
       fieldDots[lastNumber].blueDot = false;
     }
 
-    console.log("onClickDot lastNumber", fieldDots[lastNumber]);
-    console.log("onClickDot lastNumber", lastNumber);
-
     const currentDot = fieldDots[lastNumber];
 
     this.setState({
       [fieldDots[lastNumber]]: currentDot,
-    });
-  };
-
-  onMouseDot = (e, id) => {
-    console.log("e", e);
-    let fieldDots = this.state.fieldDots;
-    if (e.type === "mouseover") {
-      fieldDots[id].hoverDot = true;
-    }
-    if (e.type === "mouseout") {
-      fieldDots[id].hoverDot = false;
-    }
-    this.setState({
-      fieldDots,
     });
   };
 
@@ -308,8 +291,6 @@ export default class Game extends Component {
               key={dot.id}
               {...dot}
               onClick={() => this.onClickDot(lastNumber)}
-              onMouseOver={(e) => this.onMouseDot(e, dot.id)}
-              onMouseOut={(e) => this.onMouseDot(e, dot.id)}
             />
           ))}
         </ul>
