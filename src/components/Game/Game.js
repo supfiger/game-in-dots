@@ -26,7 +26,6 @@ export default class Game extends Component {
       loading: false,
       fieldDots: [],
       lastNumber: null,
-      prevLastNumber: null,
       points: {
         computer: [],
         user: [],
@@ -78,7 +77,12 @@ export default class Game extends Component {
         field: gameSettings[gameMode].field,
         delay: gameSettings[gameMode].delay,
       },
-      () => this.createFieldDots()
+      () => {
+        if (this.state.isGameStarted) {
+          this.resetFieldDots();
+        }
+        this.createFieldDots();
+      }
     );
   };
 
@@ -132,43 +136,45 @@ export default class Game extends Component {
     // Creating and displaying a new random blue dot and change it to red,
     // when it has not been pressed for the time period "delay"
     const generateRandomDot = () => {
-      const { fieldDots, lastNumber, points } = this.state;
-      const updatedFieldDots = [...fieldDots];
-      let updatedPoints = { ...points };
-      const prevNumber = lastNumber;
-      const prevDot = updatedFieldDots[lastNumber];
+      if (this.state.isGameStarted && !this.state.isGameFinished) {
+        const { fieldDots, lastNumber, points } = this.state;
+        const updatedFieldDots = [...fieldDots];
+        let updatedPoints = { ...points };
+        const prevNumber = lastNumber;
+        const prevDot = updatedFieldDots[lastNumber];
 
-      // Making a red dot for a prev number
-      if (prevNumber !== null && prevDot.status !== "green") {
-        updatedFieldDots[prevDot.id] = {
-          ...prevDot,
-          status: "red",
-        };
-        updatedPoints = {
-          ...updatedPoints,
-          computer: [...updatedPoints.computer, prevDot.id],
-        };
+        // Making a red dot for a prev number
+        if (prevNumber !== null && prevDot.status !== "green") {
+          updatedFieldDots[prevDot.id] = {
+            ...prevDot,
+            status: "red",
+          };
+          updatedPoints = {
+            ...updatedPoints,
+            computer: [...updatedPoints.computer, prevDot.id],
+          };
+        }
+        console.log("points.computer", this.state.points.computer);
+
+        const newLastNumber = uniqueRandomNumbers.pop();
+        const updatedCurrentDot = updatedFieldDots[newLastNumber];
+        updatedCurrentDot.status = "blue";
+
+        this.setState({
+          fieldDots: updatedFieldDots,
+          lastNumber: newLastNumber,
+          points: updatedPoints,
+        });
       }
-      console.log("points.computer", this.state.points.computer);
-
-      const newLastNumber = uniqueRandomNumbers.pop();
-      const updatedCurrentDot = updatedFieldDots[newLastNumber];
-      updatedCurrentDot.status = "blue";
-
-      this.setState({
-        fieldDots: updatedFieldDots,
-        lastNumber: newLastNumber,
-        points: updatedPoints,
-      });
-      this.gameIsFinished();
     };
 
     // Setting interval for generate a new random dot
     let currentDotIndex = 0;
     const timer = setInterval(() => {
+      this.gameIsFinished();
       generateRandomDot();
       currentDotIndex++;
-      if (currentDotIndex === max || this.state.isGameFinished) {
+      if (this.state.isGameFinished || currentDotIndex === max) {
         clearInterval(timer);
         console.log("timer ended");
       }
@@ -177,34 +183,40 @@ export default class Game extends Component {
 
   gameIsFinished = () => {
     const { points, max, user } = this.state;
+
+    if (points.computer.length == Math.floor(max / 2)) {
+      this.setState({
+        winner: "Computer",
+      });
+      this.resetFieldDots();
+    }
+
+    if (points.user.length == Math.floor(max / 2)) {
+      this.setState({
+        winner: user,
+      });
+      this.resetFieldDots();
+    }
+
+    if (this.state.isGameFinished) {
+      this.postWinnerToBoard();
+    }
+  };
+
+  resetFieldDots = () => {
     const resetState = {
       isGameFinished: true,
       isGameStarted: false,
       lastNumber: null,
-      prevLastNumber: null,
       points: {
         computer: [],
         user: [],
       },
     };
 
-    if (points.computer.length == Math.floor(max / 2)) {
-      this.setState({
-        winner: "Computer",
-        ...resetState,
-      });
-    }
-
-    if (points.user.length == Math.floor(max / 2)) {
-      this.setState({
-        winner: user,
-        ...resetState,
-      });
-    }
-
-    if (this.state.isGameFinished) {
-      this.postWinnerToBoard();
-    }
+    this.setState({
+      ...resetState,
+    });
   };
 
   onClickDot = (id) => {
