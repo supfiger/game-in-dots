@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from "react";
 import classNames from "classnames";
-import _ from "lodash";
+import { sampleSize, range } from "lodash";
 
 import "./Game.sass";
 import Dot from "./Dot/Dot";
@@ -22,6 +22,7 @@ export default class Game extends Component {
       error: null,
       field: null,
       delay: null,
+      max: null,
       loading: false,
       fieldDots: [],
       lastNumber: null,
@@ -210,34 +211,36 @@ export default class Game extends Component {
     let fieldDots = [];
     const max = field ** 2;
 
-    if (field) {
-      for (let i = 0; i < max; i++) {
-        fieldDots[i] = {
-          status: "initial",
-          id: i,
-        };
-      }
-
-      this.setState({
-        fieldDots,
-      });
+    // adding dots to the array with own properties
+    for (let i = 0; i < max; i++) {
+      fieldDots[i] = {
+        status: "initial",
+        id: i,
+      };
     }
+
+    this.setState({
+      fieldDots,
+      max,
+    });
   };
 
   gameIsStarted = () => {
-    const { field, delay } = this.state;
-    const min = 0;
-    const max = field ** 2;
-    const uniqueRandomNumbers = _.sampleSize(_.range(min, max), max);
+    const { field, delay, max } = this.state;
 
-    const generateColorDot = () => {
+    // create an array of random unique numbers from 0 to max
+    const uniqueRandomNumbers = sampleSize(range(0, max), max);
+
+    // creating and displaying a new random blue dot and change it to red,
+    // when it has not been pressed for the time period "delay"
+    const generateRandomDot = () => {
       const { fieldDots, lastNumber, points } = this.state;
       const updatedFieldDots = [...fieldDots];
       let updatedPoints = { ...points };
       const prevNumber = lastNumber;
       const prevDot = updatedFieldDots[lastNumber];
 
-      // Make red dot for prev number
+      // making a red dot for a prev number
       if (prevNumber !== null && prevDot.status !== "green") {
         updatedFieldDots[prevDot.id] = {
           ...prevDot,
@@ -248,7 +251,6 @@ export default class Game extends Component {
           computer: [...updatedPoints.computer, prevDot.id],
         };
       }
-      console.log("points.computer", points.computer);
 
       const newLastNumber = uniqueRandomNumbers.pop();
       const updatedCurrentDot = updatedFieldDots[newLastNumber];
@@ -259,11 +261,13 @@ export default class Game extends Component {
         lastNumber: newLastNumber,
         points: updatedPoints,
       });
+      console.log("points.computer", points.computer);
     };
 
-    let currentDotIndex = min;
+    // setting interval for generate new random dot
+    let currentDotIndex = 0;
     const timer = setInterval(() => {
-      generateColorDot();
+      generateRandomDot();
       currentDotIndex++;
       if (currentDotIndex === max) {
         clearInterval(timer);
@@ -277,6 +281,7 @@ export default class Game extends Component {
     const { lastNumber } = this.state;
     let currentDot = fieldDots[lastNumber];
 
+    // changing dot color to blue and set a point to user when he clicked to blue dot
     if (id === lastNumber) {
       currentDot.status = "green";
       points.user.push(lastNumber);
