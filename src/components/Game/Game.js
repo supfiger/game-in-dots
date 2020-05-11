@@ -217,9 +217,8 @@ export default class Game extends Component {
           greenDot: false,
           redDot: false,
           hoverDot: false,
+          free: true,
           id: dot,
-          available: true,
-          clickable: true,
         };
       }
 
@@ -231,24 +230,41 @@ export default class Game extends Component {
 
   updateField = () => {
     const { field, delay } = this.state;
-    let fieldDots = this.state.fieldDots;
+    let { fieldDots, lastNumber, points } = this.state;
     const min = 0;
     const max = field ** 2;
     let uniqueRandomNumbers = _.sampleSize(_.range(min, max), max);
-    let i = min;
-    let lastNumber = this.state.lastNumber;
 
     const newField = () => {
       lastNumber = uniqueRandomNumbers.pop();
-      fieldDots[lastNumber].blueDot = true;
+      let currentDot = fieldDots[lastNumber];
+
+      points.computer.push(lastNumber);
+      console.log("points", points);
+
+      if (currentDot.free === true) {
+        currentDot.blueDot = true;
+        currentDot.greenDot = false;
+        currentDot.redDot = false;
+        currentDot.free = false;
+      }
+
+      if (currentDot.free === false) {
+        currentDot.blueDot = false;
+        currentDot.greenDot = false;
+        currentDot.redDot = true;
+        currentDot.free = false;
+      }
 
       this.setState({
         fieldDots,
         lastNumber,
+        points,
       });
     };
 
-    let timer = setInterval(() => {
+    let i = min;
+    const timer = setInterval(() => {
       newField();
       i++;
       if (i === max) {
@@ -258,23 +274,25 @@ export default class Game extends Component {
     }, delay);
   };
 
-  onClickDot = (lastNumber) => {
-    let fieldDots = this.state.fieldDots;
+  onClickDot = (id) => {
+    let { fieldDots } = this.state;
+    const { lastNumber } = this.state;
+    let currentDot = fieldDots[lastNumber];
 
-    if (lastNumber) {
-      fieldDots[lastNumber].greenDot = true;
-      fieldDots[lastNumber].blueDot = false;
+    if (id === lastNumber) {
+      currentDot.blueDot = false;
+      currentDot.greenDot = true;
+      currentDot.redDot = false;
+      currentDot.free = false;
+
+      this.setState({
+        fieldDots,
+      });
     }
-
-    const currentDot = fieldDots[lastNumber];
-
-    this.setState({
-      [fieldDots[lastNumber]]: currentDot,
-    });
   };
 
   Field = () => {
-    const { field, delay, fieldDots, lastNumber } = this.state;
+    const { field, delay, fieldDots } = this.state;
 
     return (
       <div className="Field">
@@ -290,7 +308,7 @@ export default class Game extends Component {
             <Dot
               key={dot.id}
               {...dot}
-              onClick={() => this.onClickDot(lastNumber)}
+              onClick={() => this.onClickDot(dot.id)}
             />
           ))}
         </ul>
