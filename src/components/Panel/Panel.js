@@ -41,27 +41,6 @@ export default class Panel extends Component {
     this.fetchGameSettings();
   }
 
-  gameModeCallback = () => {
-    this.createFieldDots();
-    if (this.state.isGameStarted) {
-      this.resetFieldDots();
-    }
-  };
-
-  onChangeGameMode = (e) => {
-    const { gameSettings } = this.state;
-    const gameMode = e.target.value;
-
-    this.setState(
-      {
-        gameMode,
-        field: gameSettings[gameMode].field,
-        delay: gameSettings[gameMode].delay,
-      },
-      () => this.gameModeCallback()
-    );
-  };
-
   onChangeName = (e) => {
     const user = e.target.value;
     this.setState({ user });
@@ -76,7 +55,6 @@ export default class Panel extends Component {
       const isGameStarted = true;
       const isGameFinished = false;
       this.setState({ isGameStarted, isGameFinished });
-      this.props.gameIsStarted(isGameStarted);
     }
   };
 
@@ -116,7 +94,7 @@ export default class Panel extends Component {
           {loading ? (
             <div>Loading...</div>
           ) : (
-            <select value={gameMode} onChange={this.onChangeGameMode}>
+            <select value={gameMode} onChange={this.props.onChangeGameMode}>
               <option value="DEFAULT" disabled>
                 Pick game mode...
               </option>
