@@ -6,9 +6,9 @@ import "./Dot.sass";
 const Dot = (props) => {
   const { onClick, status, field } = props;
   const dotSize = {
-    big: field == 5,
-    normal: field == 10,
-    small: field == 15,
+    big: field === 5,
+    normal: field === 10,
+    small: field === 15,
   };
 
   return (

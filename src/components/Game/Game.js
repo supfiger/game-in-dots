@@ -1,5 +1,4 @@
-import React, { Component, Fragment } from "react";
-import classNames from "classnames";
+import React, { Component } from "react";
 
 import "./Game.sass";
 import Message from "./Message/Message";
@@ -14,9 +13,7 @@ export default class Game extends Component {
     this.state = {
       winner: "",
       isGameStarted: false,
-      isGameFinished: false,
       toPostWinner: {},
-      max: null,
       fieldDots: null,
       max: null,
       field: null,
@@ -99,7 +96,7 @@ export default class Game extends Component {
             createFieldDots={this.createFieldDots}
           />
           <Message winner={winner} isGameFinished={isGameFinished} />
-          {field !== null && (
+          {field !== null && field !== undefined && (
             <Field fieldDots={fieldDots} max={max} field={field} />
           )}
         </div>

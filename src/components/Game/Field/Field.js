@@ -125,19 +125,22 @@ export default class Field extends Component {
     const {
       props: { field, fieldDots },
     } = this;
+    console.log("Field component field", field);
     console.log("Field component fieldDots", fieldDots);
 
     return (
       <div className="Field">
         <ul className="grid">
-          {fieldDots.map((dot) => (
-            <Dot
-              key={dot.id}
-              field={field}
-              onClick={() => this.onClickBlueDot(dot.id)}
-              {...dot}
-            />
-          ))}
+          {fieldDots &&
+            field &&
+            fieldDots.map((dot) => (
+              <Dot
+                key={dot.id}
+                field={field}
+                onClick={() => this.onClickBlueDot(dot.id)}
+                {...dot}
+              />
+            ))}
         </ul>
       </div>
     );

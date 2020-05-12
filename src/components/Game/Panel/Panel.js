@@ -16,6 +16,7 @@ export default class Panel extends Component {
       gameMode: "DEFAULT",
       field: null,
       delay: null,
+      isGameFinished: false,
     };
   }
 
