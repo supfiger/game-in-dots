@@ -55,7 +55,6 @@ export default class Game extends Component {
       this.setState({
         winnersPost: result,
       });
-      console.log("fetchWinnersPost", result);
     } catch (error) {
       this.setState({
         error: error,
@@ -128,7 +127,7 @@ export default class Game extends Component {
   };
 
   gameIsStarted = () => {
-    const { field, delay, max } = this.state;
+    const { delay, max } = this.state;
 
     // Creating an array of random unique numbers (from 0 to max)
     const uniqueRandomNumbers = sampleSize(range(0, max), max);
@@ -140,6 +139,7 @@ export default class Game extends Component {
         const { fieldDots, lastNumber, points } = this.state;
         const updatedFieldDots = [...fieldDots];
         let updatedPoints = { ...points };
+        // console.log("updatedPoints", updatedPoints);
         const prevNumber = lastNumber;
         const prevDot = updatedFieldDots[lastNumber];
 
@@ -154,7 +154,7 @@ export default class Game extends Component {
             computer: [...updatedPoints.computer, prevDot.id],
           };
         }
-        console.log("points.computer", this.state.points.computer);
+        console.log("computer", updatedPoints.computer.length);
 
         const newLastNumber = uniqueRandomNumbers.pop();
         const updatedCurrentDot = updatedFieldDots[newLastNumber];
@@ -178,20 +178,20 @@ export default class Game extends Component {
         clearInterval(timer);
         console.log("timer ended");
       }
-    }, delay);
+    }, 500);
   };
 
   gameIsFinished = () => {
     const { points, max, user } = this.state;
 
-    if (points.computer.length == Math.floor(max / 2)) {
+    if (points.computer.length === Math.floor(max / 2)) {
       this.setState({
         winner: "Computer",
       });
       this.resetFieldDots();
     }
 
-    if (points.user.length == Math.floor(max / 2)) {
+    if (points.user.length === Math.floor(max / 2)) {
       this.setState({
         winner: user,
       });
@@ -200,6 +200,7 @@ export default class Game extends Component {
 
     if (this.state.isGameFinished) {
       this.postWinnerToBoard();
+      console.log("isGameFinished", this.state.isGameFinished);
     }
   };
 
@@ -219,7 +220,7 @@ export default class Game extends Component {
     });
   };
 
-  onClickDot = (id) => {
+  onClickBlueDot = (id) => {
     let { fieldDots, points } = this.state;
     const { lastNumber } = this.state;
     let currentDot = fieldDots[lastNumber];
@@ -228,7 +229,7 @@ export default class Game extends Component {
     if (id === lastNumber) {
       currentDot.status = "green";
       points.user.push(lastNumber);
-      console.log("points.user", points.user);
+      console.log("user", points.user.length);
 
       this.setState({
         fieldDots,
@@ -313,13 +314,13 @@ export default class Game extends Component {
   };
 
   Message = () => {
-    const { isGameFinished, winner } = this.state;
+    const { winner, isGameFinished } = this.state;
 
     return (
       <div className="Message">
-        {this.state.isGameFinished && (
+        {isGameFinished && (
           <Fragment>
-            WON: <span>{this.state.winner}</span>
+            WON: <span>{winner}</span>
           </Fragment>
         )}
       </div>
@@ -342,7 +343,7 @@ export default class Game extends Component {
           {fieldDots.map((dot) => (
             <Dot
               key={dot.id}
-              onClick={() => this.onClickDot(dot.id)}
+              onClick={() => this.onClickBlueDot(dot.id)}
               {...dot}
             />
           ))}
