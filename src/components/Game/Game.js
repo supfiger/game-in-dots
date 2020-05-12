@@ -3,7 +3,7 @@ import classNames from "classnames";
 import { sampleSize, range } from "lodash";
 
 import "./Game.sass";
-import { Dot } from "../index";
+import { Panel, Message, Field } from "../index";
 import { gameSettings } from "../../api.js";
 import { winnersPost } from "../../api.js";
 
@@ -247,108 +247,31 @@ export default class Game extends Component {
     this.fetchWinnersPost();
   };
 
-  Panel = () => {
-    const {
-      state: {
-        gameMode,
-        gameSettings,
-        user,
-        isGameStarted,
-        isGameFinished,
-        loading,
-      },
-    } = this;
-
-    const disablePlayButton =
-      gameMode === "DEFAULT" || user === "" || isGameStarted;
-
-    return (
-      <div className="Panel">
-        <div className="gameMode">
-          {loading ? (
-            <div>Loading...</div>
-          ) : (
-            <select value={gameMode} onChange={this.onChangeGameMode}>
-              <option value="DEFAULT" disabled>
-                Pick game mode...
-              </option>
-              {Object.keys(gameSettings).map((item) => (
-                <option value={item} key={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
-        <div className="inputName">
-          <input
-            className="enterName"
-            value={user}
-            onChange={this.onChangeName}
-            type="text"
-            placeholder="Enter your user"
-          />
-        </div>
-        <button
-          className="playButton"
-          onClick={this.onClickPlay}
-          disabled={disablePlayButton}
-        >
-          {isGameFinished ? `PLAY AGAIN` : `PLAY`}
-        </button>
-      </div>
-    );
-  };
-
-  Message = () => {
-    const { isGameFinished, winner } = this.state;
-
-    return (
-      <div className="Message">
-        {this.state.isGameFinished && (
-          <Fragment>
-            WON: <span>{this.state.winner}</span>
-          </Fragment>
-        )}
-      </div>
-    );
-  };
-
-  Field = () => {
-    const { field, fieldDots } = this.state;
-
-    return (
-      <div className="Field">
-        <ul
-          className={classNames({
-            grid: true,
-            easy: field === 5,
-            normal: field === 10,
-            hard: field === 15,
-          })}
-        >
-          {fieldDots.map((dot) => (
-            <Dot
-              key={dot.id}
-              onClick={() => this.onClickDot(dot.id)}
-              {...dot}
-            />
-          ))}
-        </ul>
-      </div>
-    );
-  };
-
   render() {
-    const { field } = this.state;
+    const {
+      field,
+      fieldDots,
+      gameMode,
+      gameSettings,
+      user,
+      delay,
+      max,
+      winner,
+      isGameStarted,
+      isGameFinished,
+      loading,
+    } = this.state;
+
+    const componentProps = this.state;
+    console.log("componentProps", componentProps);
 
     return (
       <div className="Game">
         <h1 className="gameTitle">Game in Dots</h1>
         <div className="content">
-          {this.Panel()}
-          {this.Message()}
-          {field !== null && this.Field()}
+          {/* <Panel {...componentProps} /> */}
+          {/* <Message {...componentProps} />
+          <Field {...componentProps} onClickDot={this.onClickDot} /> */}
         </div>
       </div>
     );
