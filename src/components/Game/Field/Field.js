@@ -104,8 +104,11 @@ export default class Field extends Component {
   };
 
   onClickBlueDot = (id) => {
-    let { fieldDots, points } = this.state;
-    const { lastNumber } = this.state;
+    const {
+      state: { points, lastNumber },
+      props: { fieldDots },
+    } = this;
+
     let currentDot = fieldDots[lastNumber];
 
     // Changing dot color to blue and set a point to user when he clicked to blue dot
@@ -125,8 +128,6 @@ export default class Field extends Component {
     const {
       props: { field, fieldDots },
     } = this;
-    console.log("Field component field", field);
-    console.log("Field component fieldDots", fieldDots);
 
     return (
       <div className="Field">

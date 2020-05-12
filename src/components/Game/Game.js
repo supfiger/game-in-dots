@@ -33,7 +33,7 @@ export default class Game extends Component {
     }
   }
 
-  createFieldDots = (fieldDots, max, field) => {
+  createFieldDots = (fieldDots, field, max) => {
     this.setState({
       fieldDots,
       max,
@@ -81,11 +81,8 @@ export default class Game extends Component {
 
   render() {
     const {
-      state: { winner, isGameFinished, fieldDots, max },
-      props: { field },
+      state: { winner, field, isGameFinished, fieldDots, max },
     } = this;
-
-    console.log("Game Component field", field);
 
     return (
       <div className="Game">

@@ -16,6 +16,7 @@ export default class Panel extends Component {
       gameMode: "DEFAULT",
       field: null,
       delay: null,
+      isGameStarted: false,
       isGameFinished: false,
     };
   }
@@ -66,7 +67,6 @@ export default class Panel extends Component {
   };
 
   onClickPlay = () => {
-    console.log("isGameFinished", this.state.isGameFinished);
     if (this.state.isGameFinished) {
       this.createFieldDots();
     }

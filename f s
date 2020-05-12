@@ -1,0 +1,89 @@
+[33mcommit 1d90e0336a2e9cc338e5b34222395a928aa054ac[m[33m ([m[1;36mHEAD -> [m[1;32mtest-1[m[33m, [m[1;31morigin/test-1[m[33m, [m[1;31morigin/master[m[33m, [m[1;32mmaster[m[33m, [m[1;32me00ada33ac04323dacce07890203883561b95ae9[m[33m)[m
+Author: supfiger <danilzin777@gmail.com>
+Date:   Tue May 12 12:26:59 2020 +0300
+
+    Continue throw functions to components
+
+[33mcommit f1fa2fe05438eecb65cf5892b3bf64eb55a0e6b9[m
+Author: supfiger <danilzin777@gmail.com>
+Date:   Tue May 12 12:04:03 2020 +0300
+
+    Created new components for individual tasks
+
+[33mcommit e00ada33ac04323dacce07890203883561b95ae9[m
+Author: supfiger <danilzin777@gmail.com>
+Date:   Tue May 12 09:18:57 2020 +0300
+
+    Renamed methods and made other minor changes
+
+[33mcommit c58b3cdf9c0d3fc111d896762ccb7e433200be1f[m
+Author: supfiger <danilzin777@gmail.com>
+Date:   Tue May 12 01:07:18 2020 +0300
+
+    minor
+
+[33mcommit a6d840a2ab69fcccb55f50d7c97634f4b68618ce[m
+Author: supfiger <danilzin777@gmail.com>
+Date:   Tue May 12 00:36:18 2020 +0300
+
+    Made a reset the playing field when a ""Play again" button is pressed
+
+[33mcommit 2a813daa6f6d564a371585e1f198e57f7cbf4b4a[m
+Author: supfiger <danilzin777@gmail.com>
+Date:   Tue May 12 00:07:12 2020 +0300
+
+    Completed posting winner of the game on board of leaders
+
+[33mcommit 1f879a95c4a50abc3cc47de1805c69bfbfd40abe[m
+Author: supfiger <danilzin777@gmail.com>
+Date:   Mon May 11 23:58:27 2020 +0300
+
+    Made point counting and winner displaying at the end of the game
+
+[33mcommit 5cb605b21755f9c30962fee36123049e0e4e8e07[m
+Author: supfiger <danilzin777@gmail.com>
+Date:   Mon May 11 23:02:08 2020 +0300
+
+    added some comments to the file
+
+[33mcommit 0b623887f383752f9ce7b4dd485306359e9d51f7[m
+Author: supfiger <danilzin777@gmail.com>
+Date:   Mon May 11 22:33:29 2020 +0300
+
+    changed name of variables, styles, methods
+
+[33mcommit 41f6772194b99453f36185010a2f5b84d9baef3f[m
+Author: supfiger <danilzin777@gmail.com>
+Date:   Mon May 11 22:02:51 2020 +0300
+
+    Work of dots changed: blue - by default, red by skipping, green by click on it.
+
+[33mcommit 657477760b79f7a0737aa73bf1efeb12e2723379[m
+Author: supfiger <danilzin777@gmail.com>
+Date:   Mon May 11 17:38:06 2020 +0300
+
+    made color changes when pressing active Dot
+
+[33mcommit 4d570bd79a359c3cdeb1b604d0870ace73bc85e6[m
+Author: supfiger <danilzin777@gmail.com>
+Date:   Mon May 11 14:37:54 2020 +0300
+
+    changed styles
+
+[33mcommit 278040a74309c24c4560bfc2e38dcb36ca6aa131[m
+Author: supfiger <danilzin777@gmail.com>
+Date:   Mon May 11 13:58:51 2020 +0300
+
+    repository initialization
+
+[33mcommit ef8c5e3718091a0ab66ecd1f1411362c67329f16[m
+Author: supfiger <danilzin777@gmail.com>
+Date:   Wed May 6 14:27:48 2020 +0300
+
+    Save before ejecting
+
+[33mcommit c4117e38abcab1bf1e632d363575d8f37c396d3e[m
+Author: supfiger <danilzin777@gmail.com>
+Date:   Wed May 6 12:03:31 2020 +0300
+
+    Initialize project using Create React App
