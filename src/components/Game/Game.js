@@ -3,7 +3,7 @@ import classNames from "classnames";
 import { sampleSize, range } from "lodash";
 
 import "./Game.sass";
-import Dot from "./Dot/Dot";
+import { Dot } from "../index";
 import { gameSettings } from "../../api.js";
 import { winnersPost } from "../../api.js";
 
