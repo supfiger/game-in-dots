@@ -5,16 +5,12 @@ import "./Panel.sass";
 export default class Panel extends Component {
   render() {
     const {
-      componentProps: {
-        field,
-        gameMode,
-        gameSettings,
-        user,
-        winner,
-        isGameStarted,
-        isGameFinished,
-        loading,
-      },
+      gameMode,
+      gameSettings,
+      isGameStarted,
+      isGameFinished,
+      user,
+      loading,
     } = this.props;
 
     const disablePlayButton =
@@ -26,7 +22,7 @@ export default class Panel extends Component {
           {loading ? (
             <div>Loading...</div>
           ) : (
-            <select value={gameMode} onChange={this.onChangeGameMode}>
+            <select value={gameMode} onChange={this.props.onChangeGameMode}>
               <option value="DEFAULT" disabled>
                 Pick game mode...
               </option>
@@ -42,14 +38,14 @@ export default class Panel extends Component {
           <input
             className="enterName"
             value={user}
-            onChange={this.onChangeName}
+            onChange={this.props.onChangeName}
             type="text"
             placeholder="Enter your user"
           />
         </div>
         <button
           className="playButton"
-          onClick={this.onClickPlay}
+          onClick={this.props.onClickPlay}
           disabled={disablePlayButton}
         >
           {isGameFinished ? `PLAY AGAIN` : `PLAY`}

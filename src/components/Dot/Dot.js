@@ -4,9 +4,17 @@ import classNames from "classnames";
 import "./Dot.sass";
 
 const Dot = (props) => {
-  const { onClick, status } = props;
+  const { onClick, status, field } = props;
 
-  return <li className={classNames("Dot", status)} onClick={onClick} />;
+  const dotSize = {
+    small: field === 15,
+    middle: field === 10,
+    big: field === 5,
+  };
+
+  return (
+    <li className={classNames("Dot", status, dotSize)} onClick={onClick} />
+  );
 };
 
 export default Dot;

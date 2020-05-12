@@ -4,9 +4,7 @@ import "./Message.sass";
 
 export default class Message extends Component {
   render() {
-    const {
-      componentProps: { isGameFinished, winner },
-    } = this.props;
+    const { isGameFinished, winner } = this.props;
 
     return (
       <div className="Message">

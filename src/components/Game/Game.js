@@ -1,5 +1,4 @@
-import React, { Component, Fragment } from "react";
-import classNames from "classnames";
+import React, { Component } from "react";
 import { sampleSize, range } from "lodash";
 
 import "./Game.sass";
@@ -188,14 +187,14 @@ export default class Game extends Component {
       },
     };
 
-    if (points.computer.length == Math.floor(max / 2)) {
+    if (points.computer.length === Math.floor(max / 2)) {
       this.setState({
         winner: "Computer",
         ...resetState,
       });
     }
 
-    if (points.user.length == Math.floor(max / 2)) {
+    if (points.user.length === Math.floor(max / 2)) {
       this.setState({
         winner: user,
         ...resetState,
@@ -248,30 +247,20 @@ export default class Game extends Component {
   };
 
   render() {
-    const {
-      field,
-      fieldDots,
-      gameMode,
-      gameSettings,
-      user,
-      delay,
-      max,
-      winner,
-      isGameStarted,
-      isGameFinished,
-      loading,
-    } = this.state;
-
     const componentProps = this.state;
-    console.log("componentProps", componentProps);
 
     return (
       <div className="Game">
         <h1 className="gameTitle">Game in Dots</h1>
         <div className="content">
-          {/* <Panel {...componentProps} /> */}
-          {/* <Message {...componentProps} />
-          <Field {...componentProps} onClickDot={this.onClickDot} /> */}
+          <Panel
+            {...componentProps}
+            onChangeGameMode={this.onChangeGameMode}
+            onChangeName={this.onChangeName}
+            onClickPlay={this.onClickPlay}
+          />
+          <Message {...componentProps} />
+          <Field {...componentProps} onClickDot={this.onClickDot} />
         </div>
       </div>
     );
