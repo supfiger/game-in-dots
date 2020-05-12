@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { sampleSize, range } from "lodash";
 
 import "./Field.sass";
-import Dot from "./Dot/Dot";
+import { Dot } from "../index";
 
 export default class Field extends Component {
   constructor(props) {
@@ -21,8 +21,7 @@ export default class Field extends Component {
 
   gameIsStarted = () => {
     const {
-      state: { delay },
-      props: { max },
+      props: { field, delay, max, isGameStarted, isGameFinished, fieldDots },
     } = this;
 
     // Creating an array of random unique numbers (from 0 to max)
@@ -31,8 +30,8 @@ export default class Field extends Component {
     // Creating and displaying a new random blue dot and change it to red,
     // when it has not been pressed for the "delay" time period
     const generateRandomDot = () => {
-      if (this.state.isGameStarted && !this.state.isGameFinished) {
-        const { fieldDots, lastNumber, points } = this.state;
+      if (isGameStarted && !isGameFinished) {
+        const { lastNumber, points } = this.state;
         const updatedFieldDots = [...fieldDots];
         let updatedPoints = { ...points };
         // console.log("updatedPoints", updatedPoints);
@@ -70,37 +69,11 @@ export default class Field extends Component {
       this.gameIsFinished();
       generateRandomDot();
       currentDotIndex++;
-      if (this.state.isGameFinished || currentDotIndex === max) {
+      if (isGameFinished || currentDotIndex === max) {
         clearInterval(timer);
         console.log("==================> timer ended");
       }
     }, delay);
-  };
-
-  gameIsFinished = () => {
-    const {
-      state: { points, user },
-      props: { max },
-    } = this;
-
-    if (points.computer.length === Math.floor(max / 2)) {
-      this.setState({
-        winner: "Computer",
-      });
-      this.resetFieldDots();
-    }
-
-    if (points.user.length === Math.floor(max / 2)) {
-      this.setState({
-        winner: user,
-      });
-      this.resetFieldDots();
-    }
-
-    if (this.state.isGameFinished) {
-      this.postWinnerToBoard();
-      console.log("isGameFinished", this.state.isGameFinished);
-    }
   };
 
   onClickBlueDot = (id) => {
@@ -124,25 +97,73 @@ export default class Field extends Component {
     }
   };
 
+  gameIsFinished = () => {
+    const {
+      state: { points },
+      props: { max, user },
+    } = this;
+
+    if (points.computer.length === Math.floor(max / 2)) {
+      this.setState({
+        winner: "Computer",
+      });
+      this.resetFieldDots();
+    }
+
+    if (points.user.length === Math.floor(max / 2)) {
+      this.setState({
+        winner: user,
+      });
+      this.resetFieldDots();
+    }
+
+    if (this.state.isGameFinished) {
+      this.postWinnerToBoard();
+      console.log("isGameFinished", this.state.isGameFinished);
+    }
+  };
+
+  resetFieldDots = () => {
+    const resetState = {
+      isGameFinished: true,
+      isGameStarted: false,
+      lastNumber: null,
+      points: {
+        computer: [],
+        user: [],
+      },
+    };
+
+    this.setState({
+      ...resetState,
+    });
+  };
+
   render() {
     const {
-      props: { field, fieldDots },
+      props: { field, fieldDots, isGameStarted },
     } = this;
+
+    if (isGameStarted) {
+      this.gameIsStarted();
+    }
 
     return (
       <div className="Field">
-        <ul className="grid">
-          {fieldDots &&
-            field &&
-            fieldDots.map((dot) => (
-              <Dot
-                key={dot.id}
-                field={field}
-                onClick={() => this.onClickBlueDot(dot.id)}
-                {...dot}
-              />
-            ))}
-        </ul>
+        {field !== null && field !== undefined && (
+          <ul className="grid">
+            {fieldDots &&
+              field &&
+              fieldDots.map((dot) => (
+                <Dot
+                  key={dot.id}
+                  field={field}
+                  onClick={() => this.onClickBlueDot(dot.id)}
+                  {...dot}
+                />
+              ))}
+          </ul>
+        )}
       </div>
     );
   }

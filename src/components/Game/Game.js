@@ -1,9 +1,7 @@
 import React, { Component } from "react";
 
 import "./Game.sass";
-import Message from "./Message/Message";
-import Panel from "./Panel/Panel";
-import Field from "./Field/Field";
+import { Panel, Message, Field } from "../index";
 import { winnersPost } from "../../api.js";
 
 export default class Game extends Component {
@@ -13,6 +11,7 @@ export default class Game extends Component {
     this.state = {
       winner: "",
       isGameStarted: false,
+      isGameFinished: false,
       toPostWinner: {},
       fieldDots: null,
       max: null,
@@ -32,30 +31,6 @@ export default class Game extends Component {
       });
     }
   }
-
-  createFieldDots = (fieldDots, field, max) => {
-    this.setState({
-      fieldDots,
-      max,
-      field,
-    });
-  };
-
-  resetFieldDots = () => {
-    const resetState = {
-      isGameFinished: true,
-      isGameStarted: false,
-      lastNumber: null,
-      points: {
-        computer: [],
-        user: [],
-      },
-    };
-
-    this.setState({
-      ...resetState,
-    });
-  };
 
   postWinnerToBoard = () => {
     const { toPostWinner, winner } = this.state;
@@ -79,9 +54,35 @@ export default class Game extends Component {
     this.fetchWinnersPost();
   };
 
+  createFieldDots = (fieldDots, field, delay, max, user) => {
+    this.setState({
+      fieldDots,
+      field,
+      delay,
+      max,
+      user,
+    });
+  };
+
+  gameIsStarted = (isGameStarted) => {
+    console.log("isGameStarted", isGameStarted);
+    this.setState({
+      isGameStarted,
+    });
+  };
+
   render() {
     const {
-      state: { winner, field, isGameFinished, fieldDots, max },
+      state: {
+        winner,
+        field,
+        delay,
+        isGameStarted,
+        isGameFinished,
+        fieldDots,
+        max,
+        user,
+      },
     } = this;
 
     return (
@@ -90,12 +91,19 @@ export default class Game extends Component {
         <div className="content">
           <Panel
             isGameFinished={isGameFinished}
+            gameIsStarted={this.gameIsStarted}
             createFieldDots={this.createFieldDots}
           />
           <Message winner={winner} isGameFinished={isGameFinished} />
-          {field !== null && field !== undefined && (
-            <Field fieldDots={fieldDots} max={max} field={field} />
-          )}
+          <Field
+            isGameStarted={isGameStarted}
+            isGameFinished={isGameFinished}
+            fieldDots={fieldDots}
+            max={max}
+            field={field}
+            delay={delay}
+            user={user}
+          />
         </div>
       </div>
     );

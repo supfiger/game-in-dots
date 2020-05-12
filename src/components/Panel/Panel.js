@@ -1,23 +1,23 @@
 import React, { Component } from "react";
 
 import "./Panel.sass";
-import { gameSettings } from "../../../api";
+import { gameSettings } from "../../api";
 
 export default class Panel extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      loading: false,
       gameSettings: {},
       fieldDots: [],
       error: null,
-      user: "",
-      gameMode: "DEFAULT",
       field: null,
       delay: null,
+      user: "",
+      gameMode: "DEFAULT",
       isGameStarted: false,
       isGameFinished: false,
+      loading: false,
     };
   }
 
@@ -41,6 +41,13 @@ export default class Panel extends Component {
     this.fetchGameSettings();
   }
 
+  gameModeCallback = () => {
+    this.createFieldDots();
+    if (this.state.isGameStarted) {
+      this.resetFieldDots();
+    }
+  };
+
   onChangeGameMode = (e) => {
     const { gameSettings } = this.state;
     const gameMode = e.target.value;
@@ -51,18 +58,12 @@ export default class Panel extends Component {
         field: gameSettings[gameMode].field,
         delay: gameSettings[gameMode].delay,
       },
-      () => {
-        if (this.state.isGameStarted) {
-          this.resetFieldDots();
-        }
-        this.createFieldDots();
-      }
+      () => this.gameModeCallback()
     );
   };
 
   onChangeName = (e) => {
     const user = e.target.value;
-
     this.setState({ user });
   };
 
@@ -74,15 +75,13 @@ export default class Panel extends Component {
     if (!this.state.isGameStarted) {
       const isGameStarted = true;
       const isGameFinished = false;
-
-      this.setState({ isGameStarted, isGameFinished }, () =>
-        this.gameIsStarted()
-      );
+      this.setState({ isGameStarted, isGameFinished });
+      this.props.gameIsStarted(isGameStarted);
     }
   };
 
   createFieldDots = () => {
-    const { field } = this.state;
+    const { field, delay, user } = this.state;
     let fieldDots = [];
     const max = field ** 2;
 
@@ -99,7 +98,7 @@ export default class Panel extends Component {
       max,
     });
 
-    this.props.createFieldDots(fieldDots, field, max);
+    this.props.createFieldDots(fieldDots, field, delay, max, user);
   };
 
   render() {
