@@ -1,19 +1,19 @@
-import React, { Component, Fragment } from "react";
+import React, { Fragment } from "react";
 
 import "./Message.sass";
 
-export default class Message extends Component {
-  render() {
-    const { isGameFinished, winner } = this.props;
+const Message = (props) => {
+  const { isGameFinished, winner } = props;
 
-    return (
-      <div className="Message">
-        {isGameFinished && (
-          <Fragment>
-            WON: <span>{winner}</span>
-          </Fragment>
-        )}
-      </div>
-    );
-  }
-}
+  return (
+    <div className="Message">
+      {isGameFinished && (
+        <Fragment>
+          WON: <span>{winner}</span>
+        </Fragment>
+      )}
+    </div>
+  );
+};
+
+export default Message;

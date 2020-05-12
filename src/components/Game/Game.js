@@ -88,7 +88,6 @@ export default class Game extends Component {
   };
 
   onClickPlay = () => {
-    console.log("isGameFinished", this.state.isGameFinished);
     if (this.state.isGameFinished) {
       this.createFieldDots();
     }
@@ -148,7 +147,7 @@ export default class Game extends Component {
           computer: [...updatedPoints.computer, prevDot.id],
         };
       }
-      console.log("points.computer", this.state.points.computer);
+      console.log("points.computer", this.state.points.computer.length);
 
       const newLastNumber = uniqueRandomNumbers.pop();
       const updatedCurrentDot = updatedFieldDots[newLastNumber];
@@ -215,7 +214,7 @@ export default class Game extends Component {
     if (id === lastNumber) {
       currentDot.status = "green";
       points.user.push(lastNumber);
-      console.log("points.user", points.user);
+      console.log("points.user", points.user.length);
 
       this.setState({
         fieldDots,
