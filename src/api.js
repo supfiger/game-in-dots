@@ -24,7 +24,7 @@ export const winnersGet = async () => {
   }
 };
 
-export const winnersPost = async (body) => {
+export const publishWinner = async (body) => {
   try {
     let response = await fetch(requestURL + "/winners", {
       method: "POST",

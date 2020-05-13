@@ -3,8 +3,7 @@ import { sampleSize, range } from "lodash";
 
 import "./Game.sass";
 import { Panel, Message, Field } from "../index";
-import { gameSettings } from "../../api.js";
-import { winnersPost } from "../../api.js";
+import { gameSettings, publishWinner } from "../../api.js";
 
 export default class Game extends Component {
   constructor(props) {
@@ -17,7 +16,7 @@ export default class Game extends Component {
       gameSettings: {},
       isGameStarted: false,
       isGameFinished: false,
-      toPostWinner: {},
+      dataToPublish: {},
       error: null,
       field: null,
       delay: null,
@@ -25,7 +24,6 @@ export default class Game extends Component {
       loading: false,
       fieldDots: [],
       lastNumber: null,
-      prevLastNumber: null,
       points: {
         computer: [],
         user: [],
@@ -49,13 +47,9 @@ export default class Game extends Component {
     }
   }
 
-  async fetchWinnersPost() {
+  async fetchPublishWinner() {
     try {
-      const result = await winnersPost(this.state.toPostWinner);
-      this.setState({
-        winnersPost: result,
-      });
-      console.log("fetchWinnersPost", result);
+      await publishWinner(this.state.dataToPublish);
     } catch (error) {
       this.setState({
         error: error,
@@ -68,7 +62,7 @@ export default class Game extends Component {
   }
 
   onChangeGameMode = (e) => {
-    const { gameSettings } = this.state;
+    const { gameSettings, isGameStarted } = this.state;
     const gameMode = e.target.value;
 
     this.setState(
@@ -77,7 +71,12 @@ export default class Game extends Component {
         field: gameSettings[gameMode].field,
         delay: gameSettings[gameMode].delay,
       },
-      () => this.createFieldDots()
+      () => {
+        this.createFieldDots();
+        if (isGameStarted) {
+          this.resetFieldDots();
+        }
+      }
     );
   };
 
@@ -121,15 +120,11 @@ export default class Game extends Component {
     });
   };
 
-  gameIsStarted = () => {
-    const { field, delay, max } = this.state;
-
-    // Creating an array of random unique numbers (from 0 to max)
-    const uniqueRandomNumbers = sampleSize(range(0, max), max);
-
+  generateRandomDot = (uniqueRandomNumbers) => {
+    this.gameIsFinished();
     // Creating and displaying a new random blue dot and change it to red,
     // when it has not been pressed for the time period "delay"
-    const generateRandomDot = () => {
+    if (this.state.isGameStarted) {
       const { fieldDots, lastNumber, points } = this.state;
       const updatedFieldDots = [...fieldDots];
       let updatedPoints = { ...points };
@@ -146,9 +141,10 @@ export default class Game extends Component {
           ...updatedPoints,
           computer: [...updatedPoints.computer, prevDot.id],
         };
+        console.log("points.computer", this.state.points.computer.length);
       }
-      console.log("points.computer", this.state.points.computer.length);
 
+      // Generate a blue random dot
       const newLastNumber = uniqueRandomNumbers.pop();
       const updatedCurrentDot = updatedFieldDots[newLastNumber];
       updatedCurrentDot.status = "blue";
@@ -158,51 +154,68 @@ export default class Game extends Component {
         lastNumber: newLastNumber,
         points: updatedPoints,
       });
-      this.gameIsFinished();
-    };
+    }
+  };
+
+  gameIsStarted = () => {
+    const { delay, max } = this.state;
+
+    // Creating an array of random unique numbers (from 0 to max)
+    const uniqueRandomNumbers = sampleSize(range(0, max), max);
 
     // Setting interval for generate a new random dot
     let currentDotIndex = 0;
     const timer = setInterval(() => {
-      generateRandomDot();
+      this.generateRandomDot(uniqueRandomNumbers);
       currentDotIndex++;
       if (currentDotIndex === max || this.state.isGameFinished) {
+        this.resetFieldDots();
         clearInterval(timer);
         console.log("timer ended");
       }
-    }, delay);
+    }, 400);
   };
 
   gameIsFinished = () => {
-    const { points, max, user } = this.state;
+    const { points, max, user, winner, isGameFinished } = this.state;
+
+    if (points.computer.length === Math.floor(max / 2)) {
+      this.setState({
+        winner: "Computer",
+        isGameFinished: true,
+        isGameStarted: false,
+      });
+      this.resetFieldDots();
+    }
+
+    if (points.user.length === Math.floor(max / 2)) {
+      this.setState({
+        winner: user,
+        isGameFinished: true,
+        isGameStarted: false,
+      });
+      this.resetFieldDots();
+    }
+
+    if (isGameFinished) {
+      this.publishWinnerToBoard();
+    }
+  };
+
+  resetFieldDots = () => {
     const resetState = {
-      isGameFinished: true,
       isGameStarted: false,
       lastNumber: null,
-      prevLastNumber: null,
+      winner: null,
       points: {
         computer: [],
         user: [],
       },
     };
 
-    if (points.computer.length === Math.floor(max / 2)) {
-      this.setState({
-        winner: "Computer",
-        ...resetState,
-      });
-    }
-
-    if (points.user.length === Math.floor(max / 2)) {
-      this.setState({
-        winner: user,
-        ...resetState,
-      });
-    }
-
-    if (this.state.isGameFinished) {
-      this.postWinnerToBoard();
-    }
+    this.setState({
+      ...resetState,
+    });
   };
 
   onClickDot = (id) => {
@@ -223,9 +236,9 @@ export default class Game extends Component {
     }
   };
 
-  postWinnerToBoard = () => {
-    const { toPostWinner, winner } = this.state;
-    let uploadWinner = toPostWinner;
+  publishWinnerToBoard = () => {
+    const { winner, dataToPublish } = this.state;
+    let uploadWinner = { ...dataToPublish };
 
     const date = new Date();
     const winnerTime = `${date.toLocaleString("default", {
@@ -239,10 +252,12 @@ export default class Game extends Component {
     uploadWinner.date = winnerTime;
 
     this.setState({
-      toPostWinner: uploadWinner,
+      dataToPublish: uploadWinner,
     });
 
-    this.fetchWinnersPost();
+    console.log("uploadWinner", uploadWinner);
+
+    this.fetchPublishWinner();
   };
 
   render() {
