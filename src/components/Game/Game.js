@@ -85,10 +85,14 @@ export default class Game extends Component {
     const { isGameStarted, isGameFinished } = this.state;
     if (isGameFinished) {
       this.createFieldDots();
+      this.gameIsStarted();
     }
 
     if (!isGameStarted) {
-      await this.setState({ isGameStarted: true, isGameFinished: false });
+      await this.setState({
+        isGameStarted: true,
+        isGameFinished: false,
+      });
       this.gameIsStarted();
     }
   };
@@ -111,6 +115,29 @@ export default class Game extends Component {
       fieldDots,
       max,
     });
+  };
+
+  gameIsStarted = () => {
+    const { field, delay, max } = this.state;
+
+    // Creating an array of random unique numbers (from 0 to max)
+    const uniqueRandomNumbers = sampleSize(range(0, max), max);
+
+    // Setting interval for generate a new random dot
+    let currentDotIndex = 0;
+    const timer = setInterval(() => {
+      console.log("Игра началась?", this.state.isGameStarted);
+      this.generateRandomDot(uniqueRandomNumbers);
+      currentDotIndex++;
+      if (
+        !this.state.isGameStarted ||
+        this.state.isGameFinished ||
+        currentDotIndex === max
+      ) {
+        clearInterval(timer);
+        console.log("timer ended");
+      }
+    }, 1500);
   };
 
   generateRandomDot = (uniqueRandomNumbers) => {
@@ -150,30 +177,7 @@ export default class Game extends Component {
     }
   };
 
-  gameIsStarted = () => {
-    const { field, delay, max } = this.state;
-
-    // Creating an array of random unique numbers (from 0 to max)
-    const uniqueRandomNumbers = sampleSize(range(0, max), max);
-
-    // Setting interval for generate a new random dot
-    let currentDotIndex = 0;
-    const timer = setInterval(() => {
-      console.log("Игра началась?", this.state.isGameStarted);
-      this.generateRandomDot(uniqueRandomNumbers);
-      currentDotIndex++;
-      if (
-        !this.state.isGameStarted ||
-        this.state.isGameFinished ||
-        currentDotIndex === max
-      ) {
-        clearInterval(timer);
-        console.log("timer ended");
-      }
-    }, 1500);
-  };
-
-  gameIsFinished = () => {
+  gameIsFinished = async () => {
     const { points, max, user } = this.state;
 
     if (points.computer.length === Math.floor(max / 2)) {
@@ -191,8 +195,8 @@ export default class Game extends Component {
     }
 
     if (this.state.isGameFinished) {
+      await this.postWinnerToBoard();
       this.resetFieldDots();
-      this.postWinnerToBoard();
     }
 
     console.log("Игра закончилась?", this.state.isGameFinished);
