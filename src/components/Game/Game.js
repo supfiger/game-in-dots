@@ -3,8 +3,7 @@ import { sampleSize, range } from "lodash";
 
 import "./Game.sass";
 import { Panel, Message, Field } from "../index";
-import { gameSettings } from "../../api.js";
-import { winnersPost } from "../../api.js";
+import { gameSettings, publishWinner } from "../../api.js";
 
 export default class Game extends Component {
   constructor(props) {
@@ -12,12 +11,12 @@ export default class Game extends Component {
 
     this.state = {
       user: "",
-      winner: "",
+      winner: null,
       gameMode: "DEFAULT",
       gameSettings: {},
       isGameStarted: false,
       isGameFinished: false,
-      toPostWinner: {},
+      dataToPublish: {},
       error: null,
       field: null,
       delay: null,
@@ -25,7 +24,6 @@ export default class Game extends Component {
       loading: false,
       fieldDots: [],
       lastNumber: null,
-      prevLastNumber: null,
       points: {
         computer: [],
         user: [],
@@ -49,13 +47,9 @@ export default class Game extends Component {
     }
   }
 
-  async fetchWinnersPost() {
+  async fetchPublishWinner() {
     try {
-      const result = await winnersPost(this.state.toPostWinner);
-      this.setState({
-        winnersPost: result,
-      });
-      console.log("fetchWinnersPost", result);
+      await publishWinner(this.state.dataToPublish);
     } catch (error) {
       this.setState({
         error: error,
@@ -77,14 +71,17 @@ export default class Game extends Component {
         field: gameSettings[gameMode].field,
         delay: gameSettings[gameMode].delay,
       },
-      () => this.createFieldDots()
+      () => {
+        this.createFieldDots();
+        if (this.state.isGameStarted) {
+          this.resetFieldDots();
+        }
+      }
     );
   };
 
   onChangeName = (e) => {
-    const user = e.target.value;
-
-    this.setState({ user });
+    this.setState({ user: e.target.value });
   };
 
   onClickPlay = () => {
@@ -121,88 +118,94 @@ export default class Game extends Component {
     });
   };
 
+  generateRandomDot = (uniqueRandomNumbers) => {
+    // Creating and displaying a new random blue dot and change it to red,
+    // when it has not been pressed for the time period "delay"
+    const { fieldDots, lastNumber, points } = this.state;
+    const updatedFieldDots = [...fieldDots];
+    let updatedPoints = { ...points };
+    const prevNumber = lastNumber;
+    const prevDot = updatedFieldDots[lastNumber];
+
+    // Making a red dot for a prev number
+    if (prevNumber !== null && prevDot.status !== "green") {
+      updatedFieldDots[prevDot.id] = {
+        ...prevDot,
+        status: "red",
+      };
+      updatedPoints = {
+        ...updatedPoints,
+        computer: [...updatedPoints.computer, prevDot.id],
+      };
+    }
+    console.log("points.computer", this.state.points.computer.length);
+
+    const newLastNumber = uniqueRandomNumbers.pop();
+    const updatedCurrentDot = updatedFieldDots[newLastNumber];
+    updatedCurrentDot.status = "blue";
+
+    this.setState({
+      fieldDots: updatedFieldDots,
+      lastNumber: newLastNumber,
+      points: updatedPoints,
+    });
+  };
+
   gameIsStarted = () => {
     const { field, delay, max } = this.state;
 
     // Creating an array of random unique numbers (from 0 to max)
     const uniqueRandomNumbers = sampleSize(range(0, max), max);
 
-    // Creating and displaying a new random blue dot and change it to red,
-    // when it has not been pressed for the time period "delay"
-    const generateRandomDot = () => {
-      const { fieldDots, lastNumber, points } = this.state;
-      const updatedFieldDots = [...fieldDots];
-      let updatedPoints = { ...points };
-      const prevNumber = lastNumber;
-      const prevDot = updatedFieldDots[lastNumber];
-
-      // Making a red dot for a prev number
-      if (prevNumber !== null && prevDot.status !== "green") {
-        updatedFieldDots[prevDot.id] = {
-          ...prevDot,
-          status: "red",
-        };
-        updatedPoints = {
-          ...updatedPoints,
-          computer: [...updatedPoints.computer, prevDot.id],
-        };
-      }
-      console.log("points.computer", this.state.points.computer.length);
-
-      const newLastNumber = uniqueRandomNumbers.pop();
-      const updatedCurrentDot = updatedFieldDots[newLastNumber];
-      updatedCurrentDot.status = "blue";
-
-      this.setState({
-        fieldDots: updatedFieldDots,
-        lastNumber: newLastNumber,
-        points: updatedPoints,
-      });
-      this.gameIsFinished();
-    };
-
     // Setting interval for generate a new random dot
     let currentDotIndex = 0;
     const timer = setInterval(() => {
-      generateRandomDot();
+      this.gameIsFinished();
+      this.generateRandomDot(uniqueRandomNumbers);
       currentDotIndex++;
       if (currentDotIndex === max || this.state.isGameFinished) {
         clearInterval(timer);
         console.log("timer ended");
       }
-    }, delay);
+    }, 1000);
   };
 
   gameIsFinished = () => {
     const { points, max, user } = this.state;
-    const resetState = {
-      isGameFinished: true,
-      isGameStarted: false,
-      lastNumber: null,
-      prevLastNumber: null,
-      points: {
-        computer: [],
-        user: [],
-      },
-    };
 
     if (points.computer.length === Math.floor(max / 2)) {
       this.setState({
         winner: "Computer",
-        ...resetState,
+        isGameFinished: true,
       });
     }
 
     if (points.user.length === Math.floor(max / 2)) {
       this.setState({
         winner: user,
-        ...resetState,
+        isGameFinished: true,
       });
     }
 
     if (this.state.isGameFinished) {
+      this.resetFieldDots();
       this.postWinnerToBoard();
     }
+  };
+
+  resetFieldDots = () => {
+    const resetState = {
+      isGameStarted: false,
+      lastNumber: null,
+      points: {
+        computer: [],
+        user: [],
+      },
+    };
+
+    this.setState({
+      ...resetState,
+    });
   };
 
   onClickDot = (id) => {
@@ -224,8 +227,8 @@ export default class Game extends Component {
   };
 
   postWinnerToBoard = () => {
-    const { toPostWinner, winner } = this.state;
-    let uploadWinner = toPostWinner;
+    const { dataToPublish, winner } = this.state;
+    let uploadWinner = { ...dataToPublish };
 
     const date = new Date();
     const winnerTime = `${date.toLocaleString("default", {
@@ -239,10 +242,10 @@ export default class Game extends Component {
     uploadWinner.date = winnerTime;
 
     this.setState({
-      toPostWinner: uploadWinner,
+      dataToPublish: uploadWinner,
     });
 
-    this.fetchWinnersPost();
+    this.fetchPublishWinner();
   };
 
   render() {
