@@ -61,41 +61,35 @@ export default class Game extends Component {
     this.fetchGameSettings();
   }
 
-  onChangeGameMode = (e) => {
+  onChangeGameMode = async (e) => {
+    if (this.state.isGameStarted) {
+      this.resetFieldDots();
+    }
     const { gameSettings } = this.state;
     const gameMode = e.target.value;
 
-    this.setState(
-      {
-        gameMode,
-        field: gameSettings[gameMode].field,
-        delay: gameSettings[gameMode].delay,
-      },
-      () => {
-        this.createFieldDots();
-        if (this.state.isGameStarted) {
-          this.resetFieldDots();
-        }
-      }
-    );
+    await this.setState({
+      gameMode,
+      field: gameSettings[gameMode].field,
+      delay: gameSettings[gameMode].delay,
+    });
+
+    this.createFieldDots();
   };
 
   onChangeName = (e) => {
     this.setState({ user: e.target.value });
   };
 
-  onClickPlay = () => {
-    if (this.state.isGameFinished) {
+  onClickPlay = async () => {
+    const { isGameStarted, isGameFinished } = this.state;
+    if (isGameFinished) {
       this.createFieldDots();
     }
 
-    if (!this.state.isGameStarted) {
-      const isGameStarted = true;
-      const isGameFinished = false;
-
-      this.setState({ isGameStarted, isGameFinished }, () =>
-        this.gameIsStarted()
-      );
+    if (!isGameStarted) {
+      await this.setState({ isGameStarted: true, isGameFinished: false });
+      this.gameIsStarted();
     }
   };
 
@@ -107,7 +101,8 @@ export default class Game extends Component {
     // Adding dots to the array with own properties
     for (let i = 0; i < max; i++) {
       fieldDots[i] = {
-        status: "initial",
+        color: "initial",
+        clicked: false,
         id: i,
       };
     }
@@ -119,36 +114,40 @@ export default class Game extends Component {
   };
 
   generateRandomDot = (uniqueRandomNumbers) => {
+    const { isGameStarted, fieldDots, lastNumber, points } = this.state;
+    this.gameIsFinished();
+
     // Creating and displaying a new random blue dot and change it to red,
     // when it has not been pressed for the time period "delay"
-    const { fieldDots, lastNumber, points } = this.state;
-    const updatedFieldDots = [...fieldDots];
-    let updatedPoints = { ...points };
-    const prevNumber = lastNumber;
-    const prevDot = updatedFieldDots[lastNumber];
+    if (isGameStarted) {
+      const updatedFieldDots = [...fieldDots];
+      let updatedPoints = { ...points };
+      const prevNumber = lastNumber;
+      const prevDot = updatedFieldDots[lastNumber];
 
-    // Making a red dot for a prev number
-    if (prevNumber !== null && prevDot.status !== "green") {
-      updatedFieldDots[prevDot.id] = {
-        ...prevDot,
-        status: "red",
-      };
-      updatedPoints = {
-        ...updatedPoints,
-        computer: [...updatedPoints.computer, prevDot.id],
-      };
+      // Making a red dot for a prev number
+      if (prevNumber !== null && prevDot.color !== "green") {
+        updatedFieldDots[prevDot.id] = {
+          ...prevDot,
+          color: "red",
+        };
+        updatedPoints = {
+          ...updatedPoints,
+          computer: [...updatedPoints.computer, prevDot.id],
+        };
+      }
+      console.log("points.computer", this.state.points.computer.length);
+
+      const newLastNumber = uniqueRandomNumbers.pop();
+      const updatedCurrentDot = updatedFieldDots[newLastNumber];
+      updatedCurrentDot.color = "blue";
+
+      this.setState({
+        fieldDots: updatedFieldDots,
+        lastNumber: newLastNumber,
+        points: updatedPoints,
+      });
     }
-    console.log("points.computer", this.state.points.computer.length);
-
-    const newLastNumber = uniqueRandomNumbers.pop();
-    const updatedCurrentDot = updatedFieldDots[newLastNumber];
-    updatedCurrentDot.status = "blue";
-
-    this.setState({
-      fieldDots: updatedFieldDots,
-      lastNumber: newLastNumber,
-      points: updatedPoints,
-    });
   };
 
   gameIsStarted = () => {
@@ -160,14 +159,18 @@ export default class Game extends Component {
     // Setting interval for generate a new random dot
     let currentDotIndex = 0;
     const timer = setInterval(() => {
-      this.gameIsFinished();
+      console.log("Игра началась?", this.state.isGameStarted);
       this.generateRandomDot(uniqueRandomNumbers);
       currentDotIndex++;
-      if (currentDotIndex === max || this.state.isGameFinished) {
+      if (
+        !this.state.isGameStarted ||
+        this.state.isGameFinished ||
+        currentDotIndex === max
+      ) {
         clearInterval(timer);
         console.log("timer ended");
       }
-    }, 1000);
+    }, 1500);
   };
 
   gameIsFinished = () => {
@@ -191,6 +194,8 @@ export default class Game extends Component {
       this.resetFieldDots();
       this.postWinnerToBoard();
     }
+
+    console.log("Игра закончилась?", this.state.isGameFinished);
   };
 
   resetFieldDots = () => {
@@ -209,19 +214,23 @@ export default class Game extends Component {
   };
 
   onClickDot = (id) => {
-    let { fieldDots, points } = this.state;
-    const { lastNumber } = this.state;
-    let currentDot = fieldDots[lastNumber];
+    const { fieldDots, points, lastNumber } = this.state;
+
+    let updatedPoints = { ...points };
+    let updatedFieldDots = [...fieldDots];
+    let currentDot = updatedFieldDots[lastNumber];
 
     // Changing dot color to blue and set a point to user when he clicked to blue dot
     if (id === lastNumber) {
-      currentDot.status = "green";
-      points.user.push(lastNumber);
+      currentDot.color = "green";
+      currentDot.clicked = true;
+
+      updatedPoints.user.push(lastNumber);
       console.log("points.user", points.user.length);
 
       this.setState({
-        fieldDots,
-        points,
+        fieldDots: updatedFieldDots,
+        points: updatedPoints,
       });
     }
   };
