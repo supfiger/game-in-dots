@@ -62,18 +62,19 @@ export default class Game extends Component {
   }
 
   onChangeGameMode = async (e) => {
-    if (this.state.isGameStarted) {
-      this.resetFieldDots();
-    }
+    const { isGameStarted } = this.state;
     const { gameSettings } = this.state;
     const gameMode = e.target.value;
+
+    if (isGameStarted) {
+      this.resetFieldDots();
+    }
 
     await this.setState({
       gameMode,
       field: gameSettings[gameMode].field,
       delay: gameSettings[gameMode].delay,
     });
-
     this.createFieldDots();
   };
 
@@ -83,16 +84,13 @@ export default class Game extends Component {
 
   onClickPlay = async () => {
     const { isGameStarted, isGameFinished } = this.state;
+
     if (isGameFinished) {
       this.createFieldDots();
-      this.gameIsStarted();
     }
 
     if (!isGameStarted) {
-      await this.setState({
-        isGameStarted: true,
-        isGameFinished: false,
-      });
+      await this.setState({ isGameStarted: true, isGameFinished: false });
       this.gameIsStarted();
     }
   };
