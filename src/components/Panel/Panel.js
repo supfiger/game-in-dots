@@ -35,7 +35,6 @@ const Panel = (props) => {
       </div>
       <div className="inputName">
         <input
-          className="enterName"
           value={user}
           onChange={props.onChangeName}
           type="text"

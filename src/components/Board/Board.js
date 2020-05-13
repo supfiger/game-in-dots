@@ -39,21 +39,19 @@ export default class Board extends Component {
 
     return (
       <div className="Board">
-        <Fragment>
-          <h2 className="boardTitle">Leader Board</h2>
-          {winnersItems && winnersItems.length > 0 && (
-            <div>
-              <ul className="leaderList">
-                {winnersItems.map((item) => (
-                  <li key={item.id} className="leaderListItem">
-                    <div className="leaderUsername">{item.winner}</div>
-                    <div className="leaderDate">{item.date}</div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </Fragment>
+        <h2 className="boardTitle">Leader Board</h2>
+        {winnersItems && winnersItems.length > 0 && (
+          <div>
+            <ul className="leaderList">
+              {winnersItems.map((item) => (
+                <li key={item.id} className="leaderListItem">
+                  <div className="leaderUsername">{item.winner}</div>
+                  <div className="leaderDate">{item.date}</div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     );
   }

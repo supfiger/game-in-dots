@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { sampleSize, range } from "lodash";
+import classNames from "classnames";
 
 import "./Game.sass";
 import { Panel, Message, Field } from "../index";
@@ -90,7 +91,10 @@ export default class Game extends Component {
     }
 
     if (!isGameStarted) {
-      await this.setState({ isGameStarted: true, isGameFinished: false });
+      await this.setState({
+        isGameStarted: true,
+        isGameFinished: false,
+      });
       this.gameIsStarted();
     }
   };
@@ -135,7 +139,7 @@ export default class Game extends Component {
         clearInterval(timer);
         console.log("timer ended");
       }
-    }, 1500);
+    }, 1000);
   };
 
   generateRandomDot = (uniqueRandomNumbers) => {
@@ -170,6 +174,28 @@ export default class Game extends Component {
       this.setState({
         fieldDots: updatedFieldDots,
         lastNumber: newLastNumber,
+        points: updatedPoints,
+      });
+    }
+  };
+
+  onClickDot = (id) => {
+    const { fieldDots, points, lastNumber } = this.state;
+
+    let updatedPoints = { ...points };
+    let updatedFieldDots = [...fieldDots];
+    let currentDot = updatedFieldDots[lastNumber];
+
+    // Changing dot color to blue and set a point to user when he clicked to blue dot
+    if (id === lastNumber && currentDot.clicked === false) {
+      currentDot.color = "green";
+      currentDot.clicked = true;
+
+      updatedPoints.user.push(lastNumber);
+      console.log("points.user", updatedPoints.user.length);
+
+      this.setState({
+        fieldDots: updatedFieldDots,
         points: updatedPoints,
       });
     }
@@ -215,28 +241,6 @@ export default class Game extends Component {
     });
   };
 
-  onClickDot = (id) => {
-    const { fieldDots, points, lastNumber } = this.state;
-
-    let updatedPoints = { ...points };
-    let updatedFieldDots = [...fieldDots];
-    let currentDot = updatedFieldDots[lastNumber];
-
-    // Changing dot color to blue and set a point to user when he clicked to blue dot
-    if (id === lastNumber && currentDot.clicked === false) {
-      currentDot.color = "green";
-      currentDot.clicked = true;
-
-      updatedPoints.user.push(lastNumber);
-      console.log("points.user", points.user.length);
-
-      this.setState({
-        fieldDots: updatedFieldDots,
-        points: updatedPoints,
-      });
-    }
-  };
-
   postWinnerToBoard = () => {
     const { dataToPublish, winner } = this.state;
     let uploadWinner = { ...dataToPublish };
@@ -262,10 +266,15 @@ export default class Game extends Component {
   render() {
     const componentProps = this.state;
 
+    const contentStyles = {
+      content: true,
+      gameModeSelected: this.state.gameMode !== "DEFAULT",
+    };
+
     return (
       <div className="Game">
         <h1 className="gameTitle">Game in Dots</h1>
-        <div className="content">
+        <div className={classNames(contentStyles)}>
           <Panel
             {...componentProps}
             onChangeGameMode={this.onChangeGameMode}
