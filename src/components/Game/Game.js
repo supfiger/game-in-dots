@@ -160,8 +160,8 @@ export default class Game extends Component {
           ...updatedPoints,
           computer: [...updatedPoints.computer, prevDot.id],
         };
+        console.log("points.computer", updatedPoints.computer.length);
       }
-      console.log("points.computer", this.state.points.computer.length);
 
       const newLastNumber = uniqueRandomNumbers.pop();
       const updatedCurrentDot = updatedFieldDots[newLastNumber];
@@ -223,7 +223,7 @@ export default class Game extends Component {
     let currentDot = updatedFieldDots[lastNumber];
 
     // Changing dot color to blue and set a point to user when he clicked to blue dot
-    if (id === lastNumber) {
+    if (id === lastNumber && currentDot.clicked === false) {
       currentDot.color = "green";
       currentDot.clicked = true;
 
