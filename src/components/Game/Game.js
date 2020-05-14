@@ -147,19 +147,10 @@ export default class Game extends Component {
       } else {
         this.generateRandomDot(uniqueRandomNumbers);
       }
-      // currentDotIndex++;
-      // if (
-      //   !this.state.isGameStarted ||
-      //   this.state.isGameFinished ||
-      //   currentDotIndex === max
-      // ) {
-      //   clearInterval(timer);
-      //   console.log("timer ended");
-      // }
-    }, delay);
+    }, 1200);
   };
 
-  makeLastPointRed = () => {
+  makeLastDotRed = () => {
     const { lastNumber, points, fieldDots } = this.state;
     const updatedFieldDots = [...fieldDots];
     let updatedPoints = { ...points };
@@ -190,6 +181,7 @@ export default class Game extends Component {
       lastNumber,
       points,
     } = this.state;
+
     // Creating and displaying a new random blue dot and change it to red,
     // when it has not been pressed for the time period "delay"
     if (isGameStarted && !isGameFinished) {
@@ -208,7 +200,7 @@ export default class Game extends Component {
           ...updatedPoints,
           computer: [...updatedPoints.computer, prevDot.id],
         };
-        console.log("points.computer", updatedPoints.computer.length);
+        console.log("computer", updatedPoints.computer.length);
       }
 
       const newLastNumber = uniqueRandomNumbers.pop();
@@ -236,7 +228,7 @@ export default class Game extends Component {
       currentDot.clicked = true;
 
       updatedPoints.user.push(lastNumber);
-      console.log("points.user", updatedPoints.user.length);
+      console.log("user", updatedPoints.user.length);
 
       this.setState({
         fieldDots: updatedFieldDots,
@@ -249,13 +241,15 @@ export default class Game extends Component {
     const { points, max, user } = this.state;
     const winner =
       points.computer.length === Math.floor(max / 2) ? "Computer" : user;
+
     this.setState(
       {
         winner,
+        isGameFinished: true,
       },
       async () => {
-        this.makeLastPointRed();
-        await this.postWinnerToBoard();
+        await this.makeLastDotRed();
+        await this.publishWinnerToBoard();
         this.resetFieldDots();
       }
     );
@@ -284,7 +278,7 @@ export default class Game extends Component {
     });
   };
 
-  postWinnerToBoard = () => {
+  publishWinnerToBoard = async () => {
     const { dataToPublish, winner } = this.state;
     let uploadWinner = { ...dataToPublish };
 
@@ -303,7 +297,7 @@ export default class Game extends Component {
       dataToPublish: uploadWinner,
     });
 
-    this.fetchPublishWinner();
+    await this.fetchPublishWinner();
     this.fetchWinnersGet();
   };
 

@@ -9,7 +9,7 @@ const Panel = (props) => {
     isGameStarted,
     isGameFinished,
     user,
-    loading,
+    loadingSettings,
   } = props;
 
   const disablePlayButton =
@@ -18,7 +18,7 @@ const Panel = (props) => {
   return (
     <div className="Panel">
       <div className="gameMode">
-        {loading ? (
+        {loadingSettings ? (
           <div>Loading...</div>
         ) : (
           <select value={gameMode} onChange={props.onChangeGameMode}>
