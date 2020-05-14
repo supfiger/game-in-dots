@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from "react";
+import React, { Component } from "react";
 import Loader from "react-loader-spinner";
 
 import "./App.sass";
@@ -10,7 +10,6 @@ export default class App extends Component {
 
     this.state = {
       winnersList: {},
-      loader: true,
     };
   }
 
@@ -20,28 +19,22 @@ export default class App extends Component {
     });
   };
 
-  componentDidMount() {
-    this.setState({
-      loader: localStorage.getItem("loader"),
-    });
-  }
-
   render() {
     const { winnersList, loader } = this.state;
     console.log("loader", loader);
 
+    if (loader) {
+      return (
+        <div className="loaderWrap">
+          <Loader type="Circles" color="#00BFFF" height={100} width={100} />
+        </div>
+      );
+    }
+
     return (
       <div className="App">
-        {!loader ? (
-          <div className="loaderWrap">
-            <Loader type="Circles" color="#00BFFF" height={100} width={100} />
-          </div>
-        ) : (
-          <Fragment>
-            <Game getWinnersList={this.getWinnersList} />
-            <Board winnersList={winnersList} />
-          </Fragment>
-        )}
+        <Game getWinnersList={this.getWinnersList} />
+        <Board winnersList={winnersList} />
       </div>
     );
   }

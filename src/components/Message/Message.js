@@ -6,21 +6,19 @@ import "./Message.sass";
 const Message = (props) => {
   const { isGameStarted, isGameFinished, winner } = props;
 
-  const styles = {
+  const messageStyles = {
     Message: true,
     messageVisible: isGameStarted || (winner !== null && winner !== ""),
   };
 
-  console.log("Message isGameFinished", isGameFinished);
-
   return (
-    <div className={classNames(styles)}>
+    <div className={classNames(messageStyles)}>
+      {isGameStarted && !isGameFinished && <span>Game is started!</span>}
       {isGameFinished && (
         <Fragment>
-          WON: <span>{winner}</span>
+          <span>{winner}</span> won
         </Fragment>
       )}
-      {isGameStarted && <span>Game is started!</span>}
     </div>
   );
 };

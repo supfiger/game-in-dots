@@ -108,7 +108,7 @@ export default class Game extends Component {
         isGameStarted: true,
         isGameFinished: false,
       });
-      this.gameIsStarted();
+      this.onStartGame();
     }
   };
 
@@ -132,7 +132,7 @@ export default class Game extends Component {
     });
   };
 
-  gameIsStarted = () => {
+  onStartGame = () => {
     const { delay, max } = this.state;
 
     // Creating an array of random unique numbers (from 0 to max)
@@ -147,7 +147,7 @@ export default class Game extends Component {
       } else {
         this.generateRandomDot(uniqueRandomNumbers);
       }
-    }, 1200);
+    }, 1000);
   };
 
   makeLastDotRed = () => {
@@ -227,7 +227,10 @@ export default class Game extends Component {
       currentDot.color = "green";
       currentDot.clicked = true;
 
-      updatedPoints.user.push(lastNumber);
+      updatedPoints = {
+        ...updatedPoints,
+        user: [...updatedPoints.user, lastNumber],
+      };
       console.log("user", updatedPoints.user.length);
 
       this.setState({
@@ -303,7 +306,6 @@ export default class Game extends Component {
 
   render() {
     const componentProps = this.state;
-
     const contentStyles = {
       content: true,
       isGameModePicked: this.state.gameMode !== "DEFAULT",
@@ -311,7 +313,7 @@ export default class Game extends Component {
 
     return (
       <div className="Game">
-        <h1 className="gameTitle">Game in Dots</h1>
+        <h1 className="gameTitle">Game in dots</h1>
         <div className={classNames(contentStyles)}>
           <Panel
             {...componentProps}
