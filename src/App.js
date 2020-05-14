@@ -13,6 +13,7 @@ export default class App extends Component {
       gameSettings: {},
       loadingWinners: false,
       loadingSettings: false,
+      isGameFinished: false,
     };
   }
 
@@ -51,15 +52,18 @@ export default class App extends Component {
 
   setPublishWinner = async (data) => {
     try {
-      const result = await publishWinner(data);
+      await publishWinner(data);
     } catch (error) {
       console.error(error);
     }
   };
 
-  onPublishWinner = async (data) => {
+  onPublishWinner = async (data, isGameFinished) => {
     await this.setPublishWinner(data);
     this.fetchWinners();
+    this.setState({
+      isGameFinished,
+    });
   };
 
   render() {
@@ -68,6 +72,7 @@ export default class App extends Component {
       gameSettings,
       loadingSettings,
       loadingWinners,
+      isGameFinished,
     } = this.state;
 
     return (
@@ -77,7 +82,11 @@ export default class App extends Component {
           gameSettings={gameSettings}
           onPublishWinner={this.onPublishWinner}
         />
-        <Board loadingWinners={loadingWinners} winnersList={winnersList} />
+        <Board
+          loadingWinners={loadingWinners}
+          winnersList={winnersList}
+          isGameFinished={isGameFinished}
+        />
       </div>
     );
   }

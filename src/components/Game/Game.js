@@ -5,7 +5,6 @@ import Loader from "react-loader-spinner";
 
 import "./Game.sass";
 import { Panel, Message, Field } from "../index";
-import { publishWinner } from "../../api";
 
 export default class Game extends Component {
   constructor(props) {
@@ -38,7 +37,7 @@ export default class Game extends Component {
     const gameMode = e.target.value;
 
     if (isGameStarted) {
-      this.resetFieldDots();
+      this.resetState();
     }
 
     this.setState(
@@ -107,7 +106,7 @@ export default class Game extends Component {
       } else {
         this.generateRandomDot(uniqueRandomNumbers);
       }
-    }, 200);
+    }, delay);
   };
 
   generateRandomDot = (uniqueRandomNumbers) => {
@@ -211,7 +210,7 @@ export default class Game extends Component {
       async () => {
         await this.makeLastDotRed();
         await this.publishWinnerToBoard();
-        this.resetFieldDots();
+        this.resetState();
       }
     );
   };
@@ -224,7 +223,7 @@ export default class Game extends Component {
     );
   };
 
-  resetFieldDots = () => {
+  resetState = () => {
     const resetState = {
       isGameStarted: false,
       lastNumber: null,
@@ -240,8 +239,8 @@ export default class Game extends Component {
     });
   };
 
-  publishWinnerToBoard = async () => {
-    const { dataToPublish, winner } = this.state;
+  publishWinnerToBoard = () => {
+    const { dataToPublish, winner, isGameFinished } = this.state;
     let uploadWinner = { ...dataToPublish };
 
     const date = new Date();
@@ -255,7 +254,10 @@ export default class Game extends Component {
     uploadWinner.winner = winner;
     uploadWinner.date = winnerTime;
 
-    this.props.onPublishWinner(uploadWinner);
+    //Added const for cancel loading spinner at leaderboard
+    // const removeLoading = false;
+
+    this.props.onPublishWinner(uploadWinner, isGameFinished);
   };
 
   render() {
@@ -271,7 +273,7 @@ export default class Game extends Component {
       <div className="Game">
         <h1 className="gameTitle">Game in dots</h1>
         {loadingSettings ? (
-          <Loader type="ThreeDots" color="#00BFFF" height={100} width={100} />
+          <Loader type="TailSpin" color="#00BFFF" height={60} width={60} />
         ) : (
           <div className={classNames(contentStyles)}>
             <Panel
