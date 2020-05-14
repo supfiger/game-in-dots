@@ -115,29 +115,6 @@ export default class Game extends Component {
     }, delay);
   };
 
-  makeLastDotRed = () => {
-    const { lastNumber, points, fieldDots } = this.state;
-    const updatedFieldDots = [...fieldDots];
-    let updatedPoints = { ...points };
-    const lastDot = updatedFieldDots[lastNumber];
-
-    if (lastNumber !== null && lastDot.color !== "green") {
-      updatedFieldDots[lastDot.id] = {
-        ...lastDot,
-        color: "red",
-      };
-      updatedPoints = {
-        ...updatedPoints,
-        computer: [...updatedPoints.computer, lastDot.id],
-      };
-    }
-
-    this.setState({
-      fieldDots: updatedFieldDots,
-      points: updatedPoints,
-    });
-  };
-
   generateRandomDot = (uniqueRandomNumbers) => {
     const {
       isGameStarted,
@@ -165,7 +142,6 @@ export default class Game extends Component {
           ...updatedPoints,
           computer: [...updatedPoints.computer, prevDot.id],
         };
-        console.log("computer", updatedPoints.computer.length);
       }
 
       const newLastNumber = uniqueRandomNumbers.pop();
@@ -196,7 +172,6 @@ export default class Game extends Component {
         ...updatedPoints,
         user: [...updatedPoints.user, lastNumber],
       };
-      console.log("user", updatedPoints.user.length);
 
       this.setState({
         fieldDots: updatedFieldDots,
@@ -205,10 +180,33 @@ export default class Game extends Component {
     }
   };
 
+  makeLastDotRed = () => {
+    const { lastNumber, points, fieldDots } = this.state;
+    const updatedFieldDots = [...fieldDots];
+    let updatedPoints = { ...points };
+    const lastDot = updatedFieldDots[lastNumber];
+
+    if (lastNumber !== null && lastDot.color !== "green") {
+      updatedFieldDots[lastDot.id] = {
+        ...lastDot,
+        color: "red",
+      };
+      updatedPoints = {
+        ...updatedPoints,
+        computer: [...updatedPoints.computer, lastDot.id],
+      };
+    }
+
+    this.setState({
+      fieldDots: updatedFieldDots,
+      points: updatedPoints,
+    });
+  };
+
   onFinishGame = () => {
     const { points, max, user } = this.state;
     const winner =
-      points.computer.length === Math.floor(max / 2) ? "Computer" : user;
+      points.computer.length === Math.round(max / 2) ? "Computer" : user;
 
     this.setState(
       {

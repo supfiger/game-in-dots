@@ -4,16 +4,22 @@ import classNames from "classnames";
 import "./Message.sass";
 
 const Message = (props) => {
-  const { isGameStarted, isGameFinished, winner } = props;
+  const { isGameStarted, isGameFinished, winner, points } = props;
+  const isCounterVisible = points && isGameStarted && !isGameFinished;
 
   const messageStyles = {
     Message: true,
-    messageVisible: isGameStarted || (winner !== null && winner !== ""),
+    messageVisible: isCounterVisible || (winner !== null && winner !== ""),
   };
 
   return (
     <div className={classNames(messageStyles)}>
-      {isGameStarted && !isGameFinished && <span>Game is started!</span>}
+      {isCounterVisible && (
+        <div className="pointsCounterWrap">
+          <span>{`user: ${points.user.length}`}</span>
+          <span>{`computer: ${points.computer.length}`}</span>
+        </div>
+      )}
       {isGameFinished && (
         <Fragment>
           <span>{winner}</span> won
