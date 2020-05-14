@@ -18,20 +18,16 @@ const Panel = (props) => {
   return (
     <div className="Panel">
       <div className="gameMode">
-        {loadingSettings ? (
-          <div>Loading...</div>
-        ) : (
-          <select value={gameMode} onChange={props.onChangeGameMode}>
-            <option value="DEFAULT" disabled>
-              Pick game mode...
+        <select value={gameMode} onChange={props.onChangeGameMode}>
+          <option value="DEFAULT" disabled>
+            Pick game mode...
+          </option>
+          {Object.keys(gameSettings).map((item) => (
+            <option value={item} key={item}>
+              {item}
             </option>
-            {Object.keys(gameSettings).map((item) => (
-              <option value={item} key={item}>
-                {item}
-              </option>
-            ))}
-          </select>
-        )}
+          ))}
+        </select>
       </div>
       <div className="inputName">
         <input

@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { sampleSize, range } from "lodash";
 import classNames from "classnames";
+import Loader from "react-loader-spinner";
 
 import "./Game.sass";
 import { Panel, Message, Field } from "../index";
@@ -29,17 +30,7 @@ export default class Game extends Component {
     };
   }
 
-  async fetchPublishWinner() {
-    try {
-      await publishWinner(this.state.dataToPublish);
-    } catch (error) {
-      this.setState({
-        error: error,
-      });
-    }
-  }
-
-  onChangeGameMode = async (e) => {
+  onChangeGameMode = (e) => {
     const {
       state: { isGameStarted },
       props: { gameSettings },
@@ -50,19 +41,21 @@ export default class Game extends Component {
       this.resetFieldDots();
     }
 
-    await this.setState({
-      gameMode,
-      field: gameSettings[gameMode].field,
-      delay: gameSettings[gameMode].delay,
-    });
-    this.createFieldDots();
+    this.setState(
+      {
+        gameMode,
+        field: gameSettings[gameMode].field,
+        delay: gameSettings[gameMode].delay,
+      },
+      () => this.createFieldDots()
+    );
   };
 
   onChangeName = (e) => {
     this.setState({ user: e.target.value });
   };
 
-  onClickPlay = async () => {
+  onClickPlay = () => {
     const { isGameStarted, isGameFinished } = this.state;
 
     if (isGameFinished) {
@@ -70,11 +63,13 @@ export default class Game extends Component {
     }
 
     if (!isGameStarted) {
-      await this.setState({
-        isGameStarted: true,
-        isGameFinished: false,
-      });
-      this.onStartGame();
+      this.setState(
+        {
+          isGameStarted: true,
+          isGameFinished: false,
+        },
+        () => this.onStartGame()
+      );
     }
   };
 
@@ -112,7 +107,7 @@ export default class Game extends Component {
       } else {
         this.generateRandomDot(uniqueRandomNumbers);
       }
-    }, delay);
+    }, 200);
   };
 
   generateRandomDot = (uniqueRandomNumbers) => {
@@ -206,7 +201,7 @@ export default class Game extends Component {
   onFinishGame = () => {
     const { points, max, user } = this.state;
     const winner =
-      points.computer.length === Math.round(max / 2) ? "Computer" : user;
+      points.computer.length === Math.floor(max / 2) ? "Computer" : user;
 
     this.setState(
       {
@@ -233,6 +228,7 @@ export default class Game extends Component {
     const resetState = {
       isGameStarted: false,
       lastNumber: null,
+      dataToPublish: {},
       points: {
         computer: [],
         user: [],
@@ -259,17 +255,12 @@ export default class Game extends Component {
     uploadWinner.winner = winner;
     uploadWinner.date = winnerTime;
 
-    this.setState({
-      dataToPublish: uploadWinner,
-    });
-
-    await this.fetchPublishWinner();
-    this.props.fetchWinnersGet();
+    this.props.onPublishWinner(uploadWinner);
   };
 
   render() {
     const currentState = this.state;
-    const { gameSettings } = this.props;
+    const { gameSettings, loadingSettings } = this.props;
     const componentProps = { ...currentState, gameSettings };
     const contentStyles = {
       content: true,
@@ -279,16 +270,20 @@ export default class Game extends Component {
     return (
       <div className="Game">
         <h1 className="gameTitle">Game in dots</h1>
-        <div className={classNames(contentStyles)}>
-          <Panel
-            {...componentProps}
-            onChangeGameMode={this.onChangeGameMode}
-            onChangeName={this.onChangeName}
-            onClickPlay={this.onClickPlay}
-          />
-          <Message {...componentProps} />
-          <Field {...componentProps} onClickDot={this.onClickDot} />
-        </div>
+        {loadingSettings ? (
+          <Loader type="ThreeDots" color="#00BFFF" height={100} width={100} />
+        ) : (
+          <div className={classNames(contentStyles)}>
+            <Panel
+              {...componentProps}
+              onChangeGameMode={this.onChangeGameMode}
+              onChangeName={this.onChangeName}
+              onClickPlay={this.onClickPlay}
+            />
+            <Message {...componentProps} />
+            <Field {...componentProps} onClickDot={this.onClickDot} />
+          </div>
+        )}
       </div>
     );
   }
