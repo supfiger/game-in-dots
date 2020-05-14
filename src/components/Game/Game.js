@@ -4,7 +4,7 @@ import classNames from "classnames";
 
 import "./Game.sass";
 import { Panel, Message, Field } from "../index";
-import { gameSettings, publishWinner, winnersGet } from "../../api.js";
+import { publishWinner } from "../../api";
 
 export default class Game extends Component {
   constructor(props) {
@@ -16,47 +16,17 @@ export default class Game extends Component {
       gameMode: "DEFAULT",
       isGameStarted: false,
       isGameFinished: false,
-      dataToPublish: {},
-      gameSettings: {},
-      winnersList: {},
-      error: null,
       field: null,
       delay: null,
       max: null,
       fieldDots: [],
+      dataToPublish: {},
       lastNumber: null,
       points: {
         computer: [],
         user: [],
       },
     };
-  }
-
-  async fetchWinnersGet() {
-    try {
-      const result = await winnersGet();
-      this.setState({
-        winnersList: result.reverse(),
-      });
-      this.props.getWinnersList(this.state.winnersList);
-    } catch (error) {
-      this.setState({
-        error: error,
-      });
-    }
-  }
-
-  async fetchGameSettings() {
-    try {
-      const result = await gameSettings();
-      this.setState({
-        gameSettings: result,
-      });
-    } catch (error) {
-      this.setState({
-        error: error,
-      });
-    }
   }
 
   async fetchPublishWinner() {
@@ -69,16 +39,13 @@ export default class Game extends Component {
     }
   }
 
-  async componentDidMount() {
-    await this.fetchWinnersGet();
-    await this.fetchGameSettings();
-    localStorage.setItem("loader", false);
-  }
-
   onChangeGameMode = async (e) => {
-    const { isGameStarted } = this.state;
-    const { gameSettings } = this.state;
+    const {
+      state: { isGameStarted },
+      props: { gameSettings },
+    } = this;
     const gameMode = e.target.value;
+    let updatedGameSettings = { ...gameSettings };
 
     if (isGameStarted) {
       this.resetFieldDots();
@@ -147,7 +114,7 @@ export default class Game extends Component {
       } else {
         this.generateRandomDot(uniqueRandomNumbers);
       }
-    }, 1000);
+    }, delay);
   };
 
   makeLastDotRed = () => {
@@ -301,11 +268,13 @@ export default class Game extends Component {
     });
 
     await this.fetchPublishWinner();
-    this.fetchWinnersGet();
+    this.props.fetchWinnersGet();
   };
 
   render() {
-    const componentProps = this.state;
+    const currentState = this.state;
+    const { gameSettings } = this.props;
+    const componentProps = { ...currentState, gameSettings };
     const contentStyles = {
       content: true,
       isGameModePicked: this.state.gameMode !== "DEFAULT",

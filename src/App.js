@@ -3,6 +3,7 @@ import Loader from "react-loader-spinner";
 
 import "./App.sass";
 import { Game, Board } from "./components/index";
+import { gameSettings, winnersGet } from "./api.js";
 
 export default class App extends Component {
   constructor(props) {
@@ -10,30 +11,66 @@ export default class App extends Component {
 
     this.state = {
       winnersList: {},
+      gameSettings: {},
+      loader: false,
+      error: null,
     };
   }
 
-  getWinnersList = (winnersList) => {
-    this.setState({
-      winnersList,
-    });
-  };
+  async fetchWinnersGet() {
+    this.setState({ loader: true });
+    try {
+      const result = await winnersGet();
+      this.setState({
+        winnersList: result.reverse(),
+      });
+    } catch (error) {
+      this.setState({
+        error: error,
+      });
+    } finally {
+      this.setState({ loader: false });
+    }
+  }
+
+  async fetchGameSettings() {
+    this.setState({ loader: true });
+    try {
+      const result = await gameSettings();
+      this.setState({
+        gameSettings: result,
+      });
+    } catch (error) {
+      this.setState({
+        error: error,
+      });
+    } finally {
+      this.setState({ loader: false });
+    }
+  }
+
+  componentDidMount() {
+    this.fetchGameSettings();
+    this.fetchWinnersGet();
+  }
 
   render() {
-    const { winnersList, loader } = this.state;
-    console.log("loader", loader);
+    const { winnersList, gameSettings, loader } = this.state;
 
     if (loader) {
       return (
         <div className="loaderWrap">
-          <Loader type="Circles" color="#00BFFF" height={100} width={100} />
+          <Loader type="ThreeDots" color="#00BFFF" height={100} width={100} />
         </div>
       );
     }
 
     return (
       <div className="App">
-        <Game getWinnersList={this.getWinnersList} />
+        <Game
+          gameSettings={gameSettings}
+          fetchWinnersGet={this.fetchWinnersGet}
+        />
         <Board winnersList={winnersList} />
       </div>
     );
