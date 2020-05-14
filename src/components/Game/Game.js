@@ -45,7 +45,6 @@ export default class Game extends Component {
       props: { gameSettings },
     } = this;
     const gameMode = e.target.value;
-    let updatedGameSettings = { ...gameSettings };
 
     if (isGameStarted) {
       this.resetFieldDots();
@@ -106,9 +105,8 @@ export default class Game extends Component {
     const uniqueRandomNumbers = sampleSize(range(0, max), max);
 
     // Setting interval for generate a new random dot
-    let currentDotIndex = 0;
     const timer = setInterval(() => {
-      if (this.isGameFinished()) {
+      if (this.checkIsGameFinished()) {
         this.onFinishGame();
         clearInterval(timer);
       } else {
@@ -225,7 +223,7 @@ export default class Game extends Component {
     );
   };
 
-  isGameFinished = () => {
+  checkIsGameFinished = () => {
     const { points, max } = this.state;
     return (
       points.computer.length === Math.floor(max / 2) ||

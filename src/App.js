@@ -17,7 +17,7 @@ export default class App extends Component {
     };
   }
 
-  async fetchWinnersGet() {
+  fetchWinnersGet = async () => {
     this.setState({ loader: true });
     try {
       const result = await winnersGet();
@@ -31,9 +31,9 @@ export default class App extends Component {
     } finally {
       this.setState({ loader: false });
     }
-  }
+  };
 
-  async fetchGameSettings() {
+  fetchGameSettings = async () => {
     this.setState({ loader: true });
     try {
       const result = await gameSettings();
@@ -47,7 +47,7 @@ export default class App extends Component {
     } finally {
       this.setState({ loader: false });
     }
-  }
+  };
 
   componentDidMount() {
     this.fetchGameSettings();
