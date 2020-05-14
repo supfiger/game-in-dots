@@ -4,7 +4,7 @@ import classNames from "classnames";
 
 import "./Game.sass";
 import { Panel, Message, Field } from "../index";
-import { gameSettings, publishWinner } from "../../api.js";
+import { gameSettings, publishWinner, winnersGet } from "../../api.js";
 
 export default class Game extends Component {
   constructor(props) {
@@ -14,15 +14,15 @@ export default class Game extends Component {
       user: "",
       winner: null,
       gameMode: "DEFAULT",
-      gameSettings: {},
       isGameStarted: false,
       isGameFinished: false,
       dataToPublish: {},
+      gameSettings: {},
+      winnersList: {},
       error: null,
       field: null,
       delay: null,
       max: null,
-      loading: false,
       fieldDots: [],
       lastNumber: null,
       points: {
@@ -32,8 +32,21 @@ export default class Game extends Component {
     };
   }
 
+  async fetchWinnersGet() {
+    try {
+      const result = await winnersGet();
+      this.setState({
+        winnersList: result.reverse(),
+      });
+      this.props.getWinnersList(this.state.winnersList);
+    } catch (error) {
+      this.setState({
+        error: error,
+      });
+    }
+  }
+
   async fetchGameSettings() {
-    this.setState({ loading: true });
     try {
       const result = await gameSettings();
       this.setState({
@@ -43,8 +56,6 @@ export default class Game extends Component {
       this.setState({
         error: error,
       });
-    } finally {
-      this.setState({ loading: false });
     }
   }
 
@@ -58,8 +69,10 @@ export default class Game extends Component {
     }
   }
 
-  componentDidMount() {
-    this.fetchGameSettings();
+  async componentDidMount() {
+    await this.fetchWinnersGet();
+    await this.fetchGameSettings();
+    localStorage.setItem("loader", false);
   }
 
   onChangeGameMode = async (e) => {
@@ -120,7 +133,7 @@ export default class Game extends Component {
   };
 
   gameIsStarted = () => {
-    const { field, delay, max } = this.state;
+    const { delay, max } = this.state;
 
     // Creating an array of random unique numbers (from 0 to max)
     const uniqueRandomNumbers = sampleSize(range(0, max), max);
@@ -128,27 +141,58 @@ export default class Game extends Component {
     // Setting interval for generate a new random dot
     let currentDotIndex = 0;
     const timer = setInterval(() => {
-      console.log("Игра началась?", this.state.isGameStarted);
-      this.generateRandomDot(uniqueRandomNumbers);
-      currentDotIndex++;
-      if (
-        !this.state.isGameStarted ||
-        this.state.isGameFinished ||
-        currentDotIndex === max
-      ) {
+      if (this.isGameFinished()) {
+        this.onFinishGame();
         clearInterval(timer);
-        console.log("timer ended");
+      } else {
+        this.generateRandomDot(uniqueRandomNumbers);
       }
-    }, 1000);
+      // currentDotIndex++;
+      // if (
+      //   !this.state.isGameStarted ||
+      //   this.state.isGameFinished ||
+      //   currentDotIndex === max
+      // ) {
+      //   clearInterval(timer);
+      //   console.log("timer ended");
+      // }
+    }, delay);
+  };
+
+  makeLastPointRed = () => {
+    const { lastNumber, points, fieldDots } = this.state;
+    const updatedFieldDots = [...fieldDots];
+    let updatedPoints = { ...points };
+    const lastDot = updatedFieldDots[lastNumber];
+
+    if (lastNumber !== null && lastDot.color !== "green") {
+      updatedFieldDots[lastDot.id] = {
+        ...lastDot,
+        color: "red",
+      };
+      updatedPoints = {
+        ...updatedPoints,
+        computer: [...updatedPoints.computer, lastDot.id],
+      };
+    }
+
+    this.setState({
+      fieldDots: updatedFieldDots,
+      points: updatedPoints,
+    });
   };
 
   generateRandomDot = (uniqueRandomNumbers) => {
-    const { isGameStarted, fieldDots, lastNumber, points } = this.state;
-    this.gameIsFinished();
-
+    const {
+      isGameStarted,
+      isGameFinished,
+      fieldDots,
+      lastNumber,
+      points,
+    } = this.state;
     // Creating and displaying a new random blue dot and change it to red,
     // when it has not been pressed for the time period "delay"
-    if (isGameStarted) {
+    if (isGameStarted && !isGameFinished) {
       const updatedFieldDots = [...fieldDots];
       let updatedPoints = { ...points };
       const prevNumber = lastNumber;
@@ -201,29 +245,28 @@ export default class Game extends Component {
     }
   };
 
-  gameIsFinished = async () => {
+  onFinishGame = () => {
     const { points, max, user } = this.state;
+    const winner =
+      points.computer.length === Math.floor(max / 2) ? "Computer" : user;
+    this.setState(
+      {
+        winner,
+      },
+      async () => {
+        this.makeLastPointRed();
+        await this.postWinnerToBoard();
+        this.resetFieldDots();
+      }
+    );
+  };
 
-    if (points.computer.length === Math.floor(max / 2)) {
-      this.setState({
-        winner: "Computer",
-        isGameFinished: true,
-      });
-    }
-
-    if (points.user.length === Math.floor(max / 2)) {
-      this.setState({
-        winner: user,
-        isGameFinished: true,
-      });
-    }
-
-    if (this.state.isGameFinished) {
-      await this.postWinnerToBoard();
-      this.resetFieldDots();
-    }
-
-    console.log("Игра закончилась?", this.state.isGameFinished);
+  isGameFinished = () => {
+    const { points, max } = this.state;
+    return (
+      points.computer.length === Math.floor(max / 2) ||
+      points.user.length === Math.floor(max / 2)
+    );
   };
 
   resetFieldDots = () => {
@@ -261,6 +304,7 @@ export default class Game extends Component {
     });
 
     this.fetchPublishWinner();
+    this.fetchWinnersGet();
   };
 
   render() {
@@ -268,7 +312,7 @@ export default class Game extends Component {
 
     const contentStyles = {
       content: true,
-      gameModeSelected: this.state.gameMode !== "DEFAULT",
+      isGameModePicked: this.state.gameMode !== "DEFAULT",
     };
 
     return (
