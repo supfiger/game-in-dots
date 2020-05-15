@@ -1,13 +1,13 @@
 .Board
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: #fff;
-  width: 600px;
-  
+  display: flex
+  flex-direction: column
+  align-items: center
+  background: #fff
+  width: 100%
+
 .boardTitle
-  margin-top: 50px
-  margin-bottom: 50px
+  margin-top: 80px
+  margin-bottom: 30px
   text-align: center
 
 .loadingWrap
@@ -16,19 +16,33 @@
   align-items: center
   font-size: 25px
   
-.leaderList
+.winnersList
   list-style-type: none
   width: 400px
   padding: 0
   margin: 0
   
   &Item
-    padding: 25px 15px;
-    margin-bottom: 20px;
-    background-color: #fff;
-    display: flex;
-    justify-content: space-between;
-    color: #404040;
-    font-size: 18px;
-    box-shadow: 0px 10px 25px -5px rgba(0, 0, 0, 0.4);
-    border-radius: 20px;
+    padding: 25px 15px
+    margin-bottom: 30px
+    background-color: #fff
+    display: flex
+    justify-content: space-between
+    color: #404040
+    font-size: 18px
+    box-shadow: 0px 10px 25px -5px rgba(0, 0, 0, 0.4)
+    border-radius: 20px
+
+.highlightLastWinner:first-child
+  background: #5be43938 
+
+.winnerUsername
+  white-space: nowrap
+  overflow: hidden
+  text-overflow: ellipsis
+
+.winnerDate
+  white-space: nowrap
+  margin-left: 20px
+
+
