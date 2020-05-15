@@ -29,15 +29,14 @@ export default class Game extends Component {
     };
   }
 
-  onChangeGameMode = (e) => {
+  onChangeGameMode = async (e) => {
     const {
-      state: { isGameStarted },
       props: { gameSettings },
     } = this;
     const gameMode = e.target.value;
 
-    if (isGameStarted) {
-      this.resetState();
+    if (this.state.isGameStarted) {
+      await this.resetState();
     }
 
     this.setState(
@@ -99,14 +98,17 @@ export default class Game extends Component {
     const uniqueRandomNumbers = sampleSize(range(0, max), max);
 
     // Setting interval for generate a new random dot
+    let currentDotIndex = 0;
     const timer = setInterval(() => {
-      if (this.checkIsGameFinished()) {
+      currentDotIndex++;
+      const abortTimer = this.checkIsGameFinished(currentDotIndex);
+      if (abortTimer) {
         this.onFinishGame();
         clearInterval(timer);
       } else {
         this.generateRandomDot(uniqueRandomNumbers);
       }
-    }, delay);
+    }, 700);
   };
 
   generateRandomDot = (uniqueRandomNumbers) => {
@@ -197,29 +199,37 @@ export default class Game extends Component {
     });
   };
 
-  onFinishGame = () => {
+  onFinishGame = async () => {
     const { points, max, user } = this.state;
-    const winner =
-      points.computer.length === Math.floor(max / 2) ? "Computer" : user;
 
-    this.setState(
-      {
-        winner,
+    if (points.computer.length === Math.floor(max / 2)) {
+      this.setState({
+        winner: "computer",
         isGameFinished: true,
-      },
-      async () => {
-        await this.makeLastDotRed();
-        await this.publishWinnerToBoard();
-        this.resetState();
-      }
-    );
+      });
+    }
+
+    if (points.user.length === Math.floor(max / 2)) {
+      this.setState({
+        winner: user,
+        isGameFinished: true,
+      });
+    }
+
+    await this.makeLastDotRed();
+    if (this.state.winner !== null) {
+      await this.publishWinnerToBoard();
+    }
+    this.resetState();
   };
 
-  checkIsGameFinished = () => {
+  checkIsGameFinished = (currentDotIndex) => {
     const { points, max } = this.state;
     return (
       points.computer.length === Math.floor(max / 2) ||
-      points.user.length === Math.floor(max / 2)
+      points.user.length === Math.floor(max / 2) ||
+      !this.state.isGameStarted ||
+      currentDotIndex === max
     );
   };
 
@@ -234,9 +244,12 @@ export default class Game extends Component {
       },
     };
 
-    this.setState({
-      ...resetState,
-    });
+    this.setState(
+      {
+        ...resetState,
+      },
+      () => console.log("this.state", this.state)
+    );
   };
 
   publishWinnerToBoard = () => {

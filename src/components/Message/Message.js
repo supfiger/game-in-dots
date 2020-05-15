@@ -6,6 +6,8 @@ import "./Message.sass";
 const Message = (props) => {
   const { isGameStarted, isGameFinished, winner, points } = props;
   const isCounterVisible = points && isGameStarted && !isGameFinished;
+  const winnerCount = winner !== null && points[winner].length;
+  console.log("winnerCount", winnerCount);
 
   const messageStyles = {
     Message: true,
@@ -22,7 +24,7 @@ const Message = (props) => {
       )}
       {isGameFinished && (
         <Fragment>
-          <span>{winner}</span> won
+          <span>{winner}</span> won <span>({winnerCount} dots)</span>
         </Fragment>
       )}
     </div>
