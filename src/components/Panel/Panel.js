@@ -4,7 +4,6 @@ import "./Panel.sass";
 
 const Panel = (props) => {
   const { gameMode, gameSettings, isGameStarted, isGameFinished, user } = props;
-
   const disablePlayButton =
     gameMode === "DEFAULT" || user === "" || isGameStarted;
 

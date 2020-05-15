@@ -35,6 +35,7 @@ export default class Game extends Component {
     } = this;
     const gameMode = e.target.value;
 
+    // Abort the game when the game mode changed
     if (this.state.isGameStarted) {
       await this.resetState();
     }
@@ -108,7 +109,7 @@ export default class Game extends Component {
       } else {
         this.generateRandomDot(uniqueRandomNumbers);
       }
-    }, 700);
+    }, delay);
   };
 
   generateRandomDot = (uniqueRandomNumbers) => {
@@ -244,12 +245,9 @@ export default class Game extends Component {
       },
     };
 
-    this.setState(
-      {
-        ...resetState,
-      },
-      () => console.log("this.state", this.state)
-    );
+    this.setState({
+      ...resetState,
+    });
   };
 
   publishWinnerToBoard = () => {
