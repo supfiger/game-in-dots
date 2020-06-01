@@ -1,22 +1,22 @@
 {
   "files": {
-    "main.css": "/starnavi-game-in-dots/static/css/main.9cbdee19.chunk.css",
-    "main.js": "/starnavi-game-in-dots/static/js/main.f9f45ac9.chunk.js",
-    "main.js.map": "/starnavi-game-in-dots/static/js/main.f9f45ac9.chunk.js.map",
-    "runtime-main.js": "/starnavi-game-in-dots/static/js/runtime-main.57e8eaa7.js",
-    "runtime-main.js.map": "/starnavi-game-in-dots/static/js/runtime-main.57e8eaa7.js.map",
-    "static/js/2.36e1eb18.chunk.js": "/starnavi-game-in-dots/static/js/2.36e1eb18.chunk.js",
-    "static/js/2.36e1eb18.chunk.js.map": "/starnavi-game-in-dots/static/js/2.36e1eb18.chunk.js.map",
-    "index.html": "/starnavi-game-in-dots/index.html",
-    "precache-manifest.934f2ad4119a1a4ccf02de02b88b31df.js": "/starnavi-game-in-dots/precache-manifest.934f2ad4119a1a4ccf02de02b88b31df.js",
-    "service-worker.js": "/starnavi-game-in-dots/service-worker.js",
-    "static/css/main.9cbdee19.chunk.css.map": "/starnavi-game-in-dots/static/css/main.9cbdee19.chunk.css.map",
-    "static/js/2.36e1eb18.chunk.js.LICENSE.txt": "/starnavi-game-in-dots/static/js/2.36e1eb18.chunk.js.LICENSE.txt"
+    "main.css": "/game-in-dots/static/css/main.9cbdee19.chunk.css",
+    "main.js": "/game-in-dots/static/js/main.65546ff8.chunk.js",
+    "main.js.map": "/game-in-dots/static/js/main.65546ff8.chunk.js.map",
+    "runtime-main.js": "/game-in-dots/static/js/runtime-main.3b46c33e.js",
+    "runtime-main.js.map": "/game-in-dots/static/js/runtime-main.3b46c33e.js.map",
+    "static/js/2.36e1eb18.chunk.js": "/game-in-dots/static/js/2.36e1eb18.chunk.js",
+    "static/js/2.36e1eb18.chunk.js.map": "/game-in-dots/static/js/2.36e1eb18.chunk.js.map",
+    "index.html": "/game-in-dots/index.html",
+    "precache-manifest.b9474724ca142babc0287369ccf1da7d.js": "/game-in-dots/precache-manifest.b9474724ca142babc0287369ccf1da7d.js",
+    "service-worker.js": "/game-in-dots/service-worker.js",
+    "static/css/main.9cbdee19.chunk.css.map": "/game-in-dots/static/css/main.9cbdee19.chunk.css.map",
+    "static/js/2.36e1eb18.chunk.js.LICENSE.txt": "/game-in-dots/static/js/2.36e1eb18.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
-    "static/js/runtime-main.57e8eaa7.js",
+    "static/js/runtime-main.3b46c33e.js",
     "static/js/2.36e1eb18.chunk.js",
     "static/css/main.9cbdee19.chunk.css",
-    "static/js/main.f9f45ac9.chunk.js"
+    "static/js/main.65546ff8.chunk.js"
   ]
 }
