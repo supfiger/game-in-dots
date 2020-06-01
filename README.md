@@ -1,5 +1,5 @@
 # Game in dots
-Test task in a company "Starnavi"
+Test task for "Starnavi" company using React, lodash.
 
 ### Watch demo:
 https://supfiger.github.io/starnavi-game-in-dots/
