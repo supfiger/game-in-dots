@@ -2,7 +2,7 @@
 Test task for "Starnavi" company using React, lodash.
 
 ### Watch demo:
-https://supfiger.github.io/starnavi-game-in-dots/
+https://supfiger.github.io/game-in-dots/
 
 ### To run and view the project just run next commands:
   - **`yarn install`**
